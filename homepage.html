@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網頁入口頁面</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+        }
+
+```
+    .header {
+        height: 60px;
+        background-color: #495057;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    
+    .tab-container {
+        background-color: white;
+        margin: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .nav-tabs {
+        border-bottom: none;
+        background-color: white;
+        padding: 15px 15px 0 15px;
+    }
+    
+    .nav-tabs .nav-link {
+        border: 2px solid #dee2e6;
+        border-radius: 0;
+        margin-right: 5px;
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+        color: #212529;
+    }
+    
+    .nav-tabs .nav-link.active {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+    
+    .dropdown-menu {
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    
+    .dropdown-item {
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+    }
+    
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .tab-content {
+        padding: 30px;
+        background-color: white;
+        min-height: 400px;
+    }
+    
+    .content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .content-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 15px;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+        aspect-ratio: 1;
+        justify-content: center;
+    }
+    
+    .content-button:hover {
+        background-color: #e9ecef;
+        border-color: #007bff;
+        color: #007bff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,123,255,0.2);
+    }
+    
+    .content-button i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .content-button span {
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-align: center;
+    }
+    
+    .sub-nav {
+        background-color: white;
+        padding: 15px 15px 0 15px;
+        border-bottom: none;
+    }
+    
+    .sub-nav .nav-link {
+        border: 2px solid #dee2e6;
+        border-radius: 0;
+        margin-right: 5px;
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+    }
+    
+    .sub-nav .nav-link:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+        color: #212529;
+    }
+    
+    .modal-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .modal-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .modal-button:hover {
+        background-color: #e9ecef;
+        border-color: #007bff;
+        color: #007bff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,123,255,0.2);
+    }
+    
+    .modal-button i {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+    
+    .modal-button span {
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-align: center;
+    }
+</style>
+```
+
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>系統入口頁面</h1>
+    </div>
+
+```
+<!-- Main Content -->
+<div class="container-fluid">
+    <div class="tab-container">
+        <!-- Main Navigation Tabs -->
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab">
+                    <i class="bi bi-house-door"></i> 首頁
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="system-tab" data-bs-toggle="tab" data-bs-target="#system" type="button" role="tab">
+                    <i class="bi bi-gear"></i> 系統管理
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="business-tab" data-bs-toggle="tab" data-bs-target="#business" type="button" role="tab">
+                    <i class="bi bi-briefcase"></i> 業務系統
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab">
+                    <i class="bi bi-graph-up"></i> 報表中心
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="help-tab" data-bs-toggle="tab" data-bs-target="#help" type="button" role="tab">
+                    <i class="bi bi-question-circle"></i> 說明
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Home Tab -->
+            <div class="tab-pane fade show active" id="home" role="tabpanel">
+                <h3><i class="bi bi-house-door"></i> 系統首頁</h3>
+                <p>歡迎使用系統入口頁面</p>
+                <div class="content-grid">
+                    <a href="#" class="content-button">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>儀表板</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-bell"></i>
+                        <span>通知中心</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>行事曆</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-person-circle"></i>
+                        <span>個人設定</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- System Tab -->
+            <div class="tab-pane fade" id="system" role="tabpanel">
+                <h3><i class="bi bi-gear"></i> 系統管理</h3>
+                <p>系統設定與管理功能</p>
+                <div class="content-grid">
+                    <a href="#" class="content-button">
+                        <i class="bi bi-people"></i>
+                        <span>使用者管理</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>權限管理</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-server"></i>
+                        <span>系統監控</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-database"></i>
+                        <span>資料庫管理</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-clipboard-data"></i>
+                        <span>系統日誌</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Business Tab -->
+            <div class="tab-pane fade" id="business" role="tabpanel">
+                <!-- Sub Navigation -->
+                <div class="sub-nav">
+                    <ul class="nav nav-tabs" id="businessSubTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="crm-subtab" data-bs-toggle="pill" data-bs-target="#crm-content" type="button" role="tab">
+                                <i class="bi bi-person-lines-fill"></i> 客戶管理
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="sales-subtab" data-bs-toggle="pill" data-bs-target="#sales-content" type="button" role="tab">
+                                <i class="bi bi-cart"></i> 銷售管理
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="inventory-subtab" data-bs-toggle="pill" data-bs-target="#inventory-content" type="button" role="tab">
+                                <i class="bi bi-boxes"></i> 庫存管理
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Sub Tab Content -->
+                <div class="tab-content" id="businessSubTabContent">
+                    <div class="tab-pane fade show active" id="crm-content" role="tabpanel">
+                        <h4><i class="bi bi-person-lines-fill"></i> 客戶管理</h4>
+                        <div class="content-grid">
+                            <a href="#" class="content-button">
+                                <i class="bi bi-person-plus"></i>
+                                <span>新增客戶</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-search"></i>
+                                <span>客戶查詢</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-telephone"></i>
+                                <span>聯絡記錄</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-heart"></i>
+                                <span>客戶服務</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="sales-content" role="tabpanel">
+                        <h4><i class="bi bi-cart"></i> 銷售管理</h4>
+                        <div class="content-grid">
+                            <a href="#" class="content-button">
+                                <i class="bi bi-plus-circle"></i>
+                                <span>新增訂單</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-list-ul"></i>
+                                <span>訂單清單</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-receipt"></i>
+                                <span>發票管理</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-cash-coin"></i>
+                                <span>收款管理</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-truck"></i>
+                                <span>出貨管理</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-graph-up-arrow"></i>
+                                <span>銷售分析</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="inventory-content" role="tabpanel">
+                        <h4><i class="bi bi-boxes"></i> 庫存管理</h4>
+                        <div class="content-grid">
+                            <a href="#" class="content-button">
+                                <i class="bi bi-box-seam"></i>
+                                <span>商品管理</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-clipboard-check"></i>
+                                <span>庫存盤點</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-arrow-down-square"></i>
+                                <span>入庫管理</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-arrow-up-square"></i>
+                                <span>出庫管理</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <span>安全庫存</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-bar-chart"></i>
+                                <span>庫存報表</span>
+                            </a>
+                            <a href="#" class="content-button">
+                                <i class="bi bi-arrow-repeat"></i>
+                                <span>庫存調整</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div class="tab-pane fade" id="reports" role="tabpanel">
+                <h3><i class="bi bi-graph-up"></i> 報表中心</h3>
+                <p>各種統計報表與分析</p>
+                <div class="content-grid">
+                    <a href="#" class="content-button">
+                        <i class="bi bi-pie-chart"></i>
+                        <span>銷售報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-bar-chart-line"></i>
+                        <span>財務報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-graph-down"></i>
+                        <span>庫存報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-people-fill"></i>
+                        <span>客戶報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-calendar3"></i>
+                        <span>月報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-calendar-year"></i>
+                        <span>年報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-download"></i>
+                        <span>匯出報表</span>
+                    </a>
+                    <a href="#" class="content-button" onclick="showPrintModal(event)">
+                        <i class="bi bi-printer"></i>
+                        <span>列印報表</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Help Tab -->
+            <div class="tab-pane fade" id="help" role="tabpanel">
+                <h3><i class="bi bi-question-circle"></i> 說明中心</h3>
+                <p>系統說明與常見問題</p>
+                <div class="content-grid">
+                    <a href="#" class="content-button">
+                        <i class="bi bi-book"></i>
+                        <span>使用手冊</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-chat-dots"></i>
+                        <span>常見問題</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-headset"></i>
+                        <span>技術支援</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-envelope"></i>
+                        <span>聯絡我們</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-info-circle"></i>
+                        <span>版本資訊</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 列印報表選擇彈出框 -->
+<div class="modal fade" id="printModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="printModalLabel">
+                    <i class="bi bi-printer"></i> 選擇報表類型
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">請選擇您要列印的報表類型：</p>
+                <div class="modal-grid">
+                    <a href="#" class="modal-button" onclick="printReport('sales-summary')">
+                        <i class="bi bi-graph-up"></i>
+                        <span>銷售摘要報表</span>
+                    </a>
+                    <a href="#" class="modal-button" onclick="printReport('customer-list')">
+                        <i class="bi bi-people"></i>
+                        <span>客戶清單報表</span>
+                    </a>
+                    <a href="#" class="modal-button" onclick="printReport('inventory-status')">
+                        <i class="bi bi-boxes"></i>
+                        <span>庫存狀況報表</span>
+                    </a>
+                    <a href="#" class="modal-button" onclick="printReport('financial-statement')">
+                        <i class="bi bi-calculator"></i>
+                        <span>財務報表</span>
+                    </a>
+                    <a href="#" class="modal-button" onclick="printReport('order-history')">
+                        <i class="bi bi-receipt"></i>
+                        <span>訂單歷史報表</span>
+                    </a>
+                    <a href="#" class="modal-button" onclick="printReport('employee-performance')">
+                        <i class="bi bi-person-badge"></i>
+                        <span>員工績效報表</span>
+                    </a>
+                    <a href="#" class="modal-button" onclick="printReport('product-analysis')">
+                        <i class="bi bi-bar-chart"></i>
+                        <span>產品分析報表</span>
+                    </a>
+                    <a href="#" class="modal-button" onclick="printReport('monthly-summary')">
+                        <i class="bi bi-calendar-month"></i>
+                        <span>月度總結報表</span>
+                    </a>
+                    <a href="#" class="modal-button" onclick="printReport('cost-analysis')">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>成本分析報表</span>
+                    </a>
+                    <a href="#" class="modal-button" onclick="printReport('trend-forecast')">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>趨勢預測報表</span>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 顯示列印報表選擇彈出框
+    function showPrintModal(e) {
+        e.preventDefault();
+        const printModal = new bootstrap.Modal(document.getElementById('printModal'));
+        printModal.show();
+    }
+    
+    // 處理報表列印
+    function printReport(reportType) {
+        // 關閉彈出框
+        const printModal = bootstrap.Modal.getInstance(document.getElementById('printModal'));
+        printModal.hide();
+        
+        // 這裡可以加入實際的列印邏輯
+        console.log('列印報表類型：', reportType);
+        alert('準備列印：' + getReportName(reportType));
+    }
+    
+    // 取得報表名稱
+    function getReportName(reportType) {
+        const reportNames = {
+            'sales-summary': '銷售摘要報表',
+            'customer-list': '客戶清單報表',
+            'inventory-status': '庫存狀況報表',
+            'financial-statement': '財務報表',
+            'order-history': '訂單歷史報表',
+            'employee-performance': '員工績效報表',
+            'product-analysis': '產品分析報表',
+            'monthly-summary': '月度總結報表',
+            'cost-analysis': '成本分析報表',
+            'trend-forecast': '趨勢預測報表'
+        };
+        return reportNames[reportType] || '未知報表';
+    }
+    
+    // 處理業務系統的子選單點擊
+    function showBusinessTab(subtab) {
+        // 顯示業務系統主標籤
+        const businessTab = document.getElementById('business-tab');
+        const businessPane = document.getElementById('business');
+        
+        // 移除所有active類別
+        document.querySelectorAll('#mainTabs .nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        document.querySelectorAll('#mainTabContent .tab-pane').forEach(pane => {
+            pane.classList.remove('show', 'active');
+        });
+        
+        // 激活業務系統標籤
+        businessTab.classList.add('active');
+        businessPane.classList.add('show', 'active');
+        
+        // 激活對應的子標籤
+        document.querySelectorAll('#businessSubTabs .nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        document.querySelectorAll('#businessSubTabContent .tab-pane').forEach(pane => {
+            pane.classList.remove('show', 'active');
+        });
+        
+        // 顯示指定的子標籤內容
+        const subtabButton = document.getElementById(subtab + '-subtab');
+        const subtabContent = document.getElementById(subtab + '-content');
+        
+        if (subtabButton && subtabContent) {
+            subtabButton.classList.add('active');
+            subtabContent.classList.add('show', 'active');
+        }
+    }
+    
+    // 當主標籤被點擊時，確保業務系統標籤有預設的子標籤
+    document.getElementById('business-tab').addEventListener('click', function() {
+        // 確保第一個子標籤是激活狀態
+        setTimeout(() => {
+            if (!document.querySelector('#businessSubTabs .nav-link.active')) {
+                const firstSubTab = document.querySelector('#businessSubTabs .nav-link');
+                const firstSubContent = document.querySelector('#businessSubTabContent .tab-pane');
+                if (firstSubTab && firstSubContent) {
+                    firstSubTab.classList.add('active');
+                    firstSubContent.classList.add('show', 'active');
+                }
+            }
+        }, 50);
+    });
+    
+    // 為按鈕添加點擊效果
+    document.querySelectorAll('.content-button').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            // 這裡可以添加實際的連結功能
+            console.log('點擊了：', this.querySelector('span').textContent);
+        });
+    });
+</script>
+```
+
+</body>
+</html>
