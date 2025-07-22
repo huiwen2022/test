@@ -1,0 +1,145 @@
+{
+  "test1": {
+    "basic_info": {
+      "employee_id": "test1",
+      "name": "test1",
+      "id_number": "test1",
+      "gender": "男",
+      "birth_date": "test1",
+      "phone": "test1",
+      "email": "",
+      "emergency_contact": "",
+      "emergency_phone": "",
+      "address": "test1",
+      "mailing_address": "",
+      "department": "技術部",
+      "position": "經理",
+      "job_level": "2級",
+      "hire_date": "test1",
+      "supervisor": "",
+      "work_location": "台北",
+      "employment_type": "正職",
+      "salary_grade": ""
+    },
+    "performance_records": [
+      {
+        "year": "2021",
+        "first_half": "優",
+        "second_half": "優",
+        "annual_rating": "優",
+        "remarks": ""
+      },
+      {
+        "year": "2023",
+        "first_half": "優",
+        "second_half": "優",
+        "annual_rating": "優",
+        "remarks": ""
+      },
+      {
+        "year": "2022",
+        "first_half": "優",
+        "second_half": "優",
+        "annual_rating": "優",
+        "remarks": ""
+      }
+    ],
+    "leave_requests": [
+      {
+        "apply_date": "2025-07-23",
+        "leave_type": "年假",
+        "start_date": "test2",
+        "end_date": "test2",
+        "days": "test2",
+        "status": "已核准",
+        "reason": "test2"
+      },
+      {
+        "apply_date": "2025-07-23",
+        "leave_type": "事假",
+        "start_date": "test2",
+        "end_date": "test2",
+        "days": "test2",
+        "status": "待審核",
+        "reason": "test2"
+      },
+      {
+        "apply_date": "2025-07-23",
+        "leave_type": "喪假",
+        "start_date": "test2",
+        "end_date": "test2",
+        "days": "test2",
+        "status": "待審核",
+        "reason": "test2"
+      }
+    ],
+    "overtime_requests": []
+  },
+  "test2": {
+    "basic_info": {
+      "employee_id": "test2",
+      "name": "test2",
+      "id_number": "test2",
+      "gender": "女",
+      "birth_date": "test2",
+      "phone": "test2",
+      "email": "",
+      "emergency_contact": "",
+      "emergency_phone": "",
+      "address": "test2",
+      "mailing_address": "",
+      "department": "人事部",
+      "position": "副理",
+      "job_level": "2級",
+      "hire_date": "test2",
+      "supervisor": "",
+      "work_location": "台北",
+      "employment_type": "正職",
+      "salary_grade": ""
+    },
+    "performance_records": [
+      {
+        "year": "2023",
+        "first_half": "優",
+        "second_half": "優",
+        "annual_rating": "優",
+        "remarks": ""
+      },
+      {
+        "year": "2024",
+        "first_half": "優",
+        "second_half": "優",
+        "annual_rating": "優",
+        "remarks": ""
+      },
+      {
+        "year": "2025",
+        "first_half": "優",
+        "second_half": "優",
+        "annual_rating": "優",
+        "remarks": ""
+      }
+    ],
+    "leave_requests": [
+      {
+        "apply_date": "2025-07-23",
+        "leave_type": "婚假",
+        "start_date": "test2",
+        "end_date": "test2",
+        "days": "test2",
+        "status": "待審核",
+        "reason": "test2"
+      },
+      {
+        "apply_date": "2025-07-23",
+        "leave_type": "病假",
+        "start_date": "test2",
+        "end_date": "test2",
+        "days": "test2",
+        "status": "已核准",
+        "reason": "test2"
+      }
+    ],
+    "overtime_requests": []
+  }
+}
