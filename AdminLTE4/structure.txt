@@ -1,0 +1,10 @@
+/adminlte-demo
+│
+├── dashboard.php
+├── profile.php
+├── logout.php
+│
+├── layout/
+│   ├── header.php      ← HTML <head> 與 <body> 開頭
+│   ├── sidebar.php     ← AdminLTE 側邊選單
+│   ├── footer.php      ← 結尾 JS 與 </body>
