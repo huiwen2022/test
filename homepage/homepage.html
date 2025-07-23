@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網頁入口頁面</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="./hompage_component/homepage.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>系統入口頁面</h1>
+    </div>
+
+<!-- Main Content -->
+<div class="container-fluid">
+    <div class="tab-container">
+        <!-- Main Navigation Tabs -->
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab">
+                    <i class="bi bi-house-door"></i> 首頁
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="system-tab" data-bs-toggle="tab" data-bs-target="#system" type="button" role="tab">
+                    <i class="bi bi-gear"></i> 系統管理
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab">
+                    <i class="bi bi-graph-up"></i> 報表中心
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="help-tab" data-bs-toggle="tab" data-bs-target="#help" type="button" role="tab">
+                    <i class="bi bi-question-circle"></i> 說明
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Home Tab -->
+            <div class="tab-pane fade show active" id="home" role="tabpanel">
+                <h3><i class="bi bi-house-door"></i> 系統首頁</h3>
+                <p>歡迎使用系統入口頁面</p>
+                <div class="content-grid">
+                    <a href="#" class="content-button">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>儀表板</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-bell"></i>
+                        <span>通知中心</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>行事曆</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-person-circle"></i>
+                        <span>個人設定</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- System Tab -->
+            <div class="tab-pane fade" id="system" role="tabpanel">
+                <h3><i class="bi bi-gear"></i> 系統管理</h3>
+                <p>系統設定與管理功能</p>
+                <div class="content-grid">
+                    <a href="#" class="content-button">
+                        <i class="bi bi-people"></i>
+                        <span>使用者管理</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>權限管理</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-server"></i>
+                        <span>系統監控</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-database"></i>
+                        <span>資料庫管理</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-clipboard-data"></i>
+                        <span>系統日誌</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div class="tab-pane fade" id="reports" role="tabpanel">
+                <h3><i class="bi bi-graph-up"></i> 報表中心</h3>
+                <p>各種統計報表與分析</p>
+                <div class="content-grid">
+                    <a href="#" class="content-button" onclick="showProductModal(event)">
+                        <i class="bi bi-pie-chart"></i>
+                        <span>銷售報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-bar-chart-line"></i>
+                        <span>財務報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-graph-down"></i>
+                        <span>庫存報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-people-fill"></i>
+                        <span>客戶報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-calendar3"></i>
+                        <span>月報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-calendar-year"></i>
+                        <span>年報表</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-download"></i>
+                        <span>匯出報表</span>
+                    </a>
+                    <a href="#" class="content-button" onclick="showPrintModal(event)">
+                        <i class="bi bi-printer"></i>
+                        <span>列印報表</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Help Tab -->
+            <div class="tab-pane fade" id="help" role="tabpanel">
+                <h3><i class="bi bi-question-circle"></i> 說明中心</h3>
+                <p>系統說明與常見問題</p>
+                <div class="content-grid">
+                    <a href="#" class="content-button">
+                        <i class="bi bi-book"></i>
+                        <span>使用手冊</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-chat-dots"></i>
+                        <span>常見問題</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-headset"></i>
+                        <span>技術支援</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-envelope"></i>
+                        <span>聯絡我們</span>
+                    </a>
+                    <a href="#" class="content-button">
+                        <i class="bi bi-info-circle"></i>
+                        <span>版本資訊</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 列印報表選擇彈出框 -->
+<div class="modal fade" id="printModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="printModalLabel">
+                    <i class="bi bi-printer"></i> 選擇報表類型
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">請選擇您要列印的報表類型：</p>
+                <div class="modal-grid">
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-graph-up"></i>
+                        <span>銷售摘要報表</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-people"></i>
+                        <span>客戶清單報表</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-boxes"></i>
+                        <span>庫存狀況報表</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-calculator"></i>
+                        <span>財務報表</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-receipt"></i>
+                        <span>訂單歷史報表</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-person-badge"></i>
+                        <span>員工績效報表</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-bar-chart"></i>
+                        <span>產品分析報表</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-calendar-month"></i>
+                        <span>月度總結報表</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>成本分析報表</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>趨勢預測報表</span>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 商品管理選擇彈出框 -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">
+                    <i class="bi bi-printer"></i> 選擇報表類型
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">請選擇您要列印的報表類型：</p>
+                <div class="modal-grid">
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-graph-up"></i>
+                        <span>內部製造</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-people"></i>
+                        <span>代理商品</span>
+                    </a>
+                    <a href="#" class="modal-button">
+                        <i class="bi bi-boxes"></i>
+                        <span>委外</span>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 顯示列印報表選擇彈出框
+    function showPrintModal(e) {
+        e.preventDefault();
+        const printModal = new bootstrap.Modal(document.getElementById('printModal'));
+        printModal.show();
+    }
+    // 顯示商品管理選擇彈出框
+    function showProductModal(e) {
+        e.preventDefault();
+        const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+        productModal.show();
+    }
+</script>
+
+</body>
+</html>

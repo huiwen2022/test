@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網頁入口頁面</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="./hompage_component/homepage.css" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <h1>系統入口頁面</h1>
+    </div>
+
+    <div class="container-fluid">
+        <div class="tab-container">
+            <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab">
+                <i class="bi bi-house-door"></i> 首頁
+            </button>
+        </li>
+
+        <li class="nav-item" role="presentation">
+            <button class="nav-link " id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab">
+                <i class="bi bi-graph-up"></i> 報表中心
+            </button>
+        </li>
+
+        <li class="nav-item" role="presentation">
+            <button class="nav-link " id="user-tab" data-bs-toggle="tab" data-bs-target="#user" type="button" role="tab">
+                <i class="bi bi-graph-up"></i> 使用者管理
+            </button>
+        </li>
+            </ul>
+
+            <div class="tab-content" id="mainTabContent">
+                
+        <div class="tab-pane fade show active" id="home" role="tabpanel">
+            <h3><i class="bi bi-house-door"></i> 系統首頁</h3>
+            <p>歡迎使用系統入口頁面</p>
+            <div class="content-grid">
+                
+        <a href="#" class="content-button bg-primary text-white"  >
+            <i class="bi bi-speedometer2"></i>
+            <span>儀表板</span>
+        </a>
+
+        <a href="#" class="content-button bg-warning text-dark"  >
+            <i class="bi bi-bell"></i>
+            <span>通知中心</span>
+        </a>
+
+        <a href="#" class="content-button"  style="background-color: #ccc; color: #000">
+            <i class="bi bi-pen"></i>
+            <span>編輯</span>
+        </a>
+            </div>
+        </div>
+
+        <div class="tab-pane fade " id="reports" role="tabpanel">
+            <h3><i class="bi bi-graph-up"></i> 報表中心</h3>
+            <p>各種統計報表與分析</p>
+            <div class="content-grid">
+                
+        <a href="#" class="content-button bg-info text-white" onclick="showPrintModal(event)" >
+            <i class="bi bi-printer"></i>
+            <span>列印報表</span>
+        </a>
+            </div>
+        </div>
+
+        <div class="tab-pane fade " id="user" role="tabpanel">
+            <h3><i class="bi bi-graph-up"></i> 使用者管理</h3>
+            <p>權限之類的</p>
+            <div class="content-grid">
+                
+        <a href="#" class="content-button bg-info text-white"  >
+            <i class="bi bi-person"></i>
+            <span>使用者基本資料</span>
+        </a>
+
+        <a href="#" class="content-button" onclick="showPermissionModal(event)" style="background-color: #333; color: #fff">
+            <i class="bi bi-gear"></i>
+            <span>權限管理</span>
+        </a>
+            </div>
+        </div>
+            </div>
+        </div>
+    </div>
+
+    
+<div class="modal fade" id="printModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="printModalLabel">
+                    <i class="bi bi-printer"></i> 選擇報表類型
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">請選擇您要列印的報表類型：</p>
+                <div class="modal-grid">
+                    
+        <a href="#" class="modal-button"  >
+            <i class="bi bi-graph-up"></i>
+            <span>銷售摘要報表</span>
+        </a>
+
+        <a href="#" class="modal-button"  >
+            <i class="bi bi-people"></i>
+            <span>客戶清單報表</span>
+        </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="PermissionModal" tabindex="-1" aria-labelledby="PermissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="PermissionModalLabel">
+                    <i class="bi bi-printer"></i> 選擇權限類別
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">請選擇您要管理的權限類型：</p>
+                <div class="modal-grid">
+                    
+        <a href="#" class="modal-button"  style="background-color: #333; color: #fff">
+            <i class="bi bi-graph-up"></i>
+            <span>角色</span>
+        </a>
+
+        <a href="#" class="modal-button"  style="background-color: #ccc; color: pink">
+            <i class="bi bi-people"></i>
+            <span>部門</span>
+        </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+function showPrintModal(e) {
+    e.preventDefault();
+    const modal = new bootstrap.Modal(document.getElementById('printModal'));
+    modal.show();
+}
+
+function showPermissionModal(e) {
+    e.preventDefault();
+    const modal = new bootstrap.Modal(document.getElementById('PermissionModal'));
+    modal.show();
+}
+</script>
+</body>
+</html>

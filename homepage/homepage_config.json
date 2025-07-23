@@ -1,0 +1,93 @@
+{
+    "tabs": [
+      {
+        "id": "home",
+        "title": "首頁",
+        "icon": "bi-house-door",
+        "heading": "系統首頁",
+        "description": "歡迎使用系統入口頁面",
+        "buttons": [
+          {
+            "label": "儀表板",
+            "icon": "bi-speedometer2",
+            "link": "#",
+            "bg_color": "bg-primary",
+            "text_color": "text-white"
+          },
+          {
+            "label": "通知中心",
+            "icon": "bi-bell",
+            "link": "#",
+            "bg_color": "bg-warning",
+            "text_color": "text-dark"
+          },
+          {
+            "label": "編輯",
+            "icon": "bi-pen",
+            "link": "#",
+            "bg_color": "#ccc",
+            "text_color": "#000"
+          }
+        ]
+      },
+      {
+        "id": "reports",
+        "title": "報表中心",
+        "icon": "bi-graph-up",
+        "heading": "報表中心",
+        "description": "各種統計報表與分析",
+        "buttons": [
+          {
+            "label": "列印報表",
+            "icon": "bi-printer",
+            "onclick": "showPrintModal(event)",
+            "bg_color": "bg-info",
+            "text_color": "text-white"
+          }
+        ]
+      },
+      {
+        "id": "user",
+        "title": "使用者管理",
+        "icon": "bi-graph-up",
+        "heading": "使用者管理",
+        "description": "權限之類的",
+        "buttons": [
+          {
+            "label": "使用者基本資料",
+            "icon": "bi-person",
+            "link": "#",
+            "bg_color": "bg-info",
+            "text_color": "text-white"
+          },{
+            "label": "權限管理",
+            "icon": "bi-gear",
+            "onclick": "showPermissionModal(event)",
+            "bg_color": "#333",
+            "text_color": "#fff"
+          }
+        ]
+      }
+    ],
+    "modals": [
+      {
+        "id": "printModal",
+        "title": "選擇報表類型",
+        "description": "請選擇您要列印的報表類型：",
+        "buttons": [
+          { "label": "銷售摘要報表", "icon": "bi-graph-up", "link": "#" },
+          { "label": "客戶清單報表", "icon": "bi-people", "link": "#" }
+        ]
+      },
+      {
+        "id": "PermissionModal",
+        "title": "選擇權限類別",
+        "description": "請選擇您要管理的權限類型：",
+        "buttons": [
+          { "label": "角色", "icon": "bi-graph-up", "link": "#","bg_color": "#333","text_color": "#fff" },
+          { "label": "部門", "icon": "bi-people", "link": "#","bg_color": "#ccc","text_color": "pink" }
+        ]
+      }
+    ]
+  }
+  
