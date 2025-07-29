@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabulator 多頁籤 Excel 匯出</title>
+    
+    <!-- Tabulator CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.5.0/css/tabulator.min.css" rel="stylesheet">
+    
+    <!-- ExcelJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    
+    <!-- Tabulator JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.5.0/js/tabulator.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .tabs-container {
+            position: relative;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            overflow: hidden;
+        }
+        
+        .tabs-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        
+        .tabs-nav-btn {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            min-width: 50px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .tabs-nav-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            transform: translateY(-1px);
+        }
+        
+        .tabs-nav-btn:disabled {
+            background: #e9ecef;
+            color: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .tabs-nav-btn.right {
+            border-right: none;
+            border-left: 1px solid #dee2e6;
+        }
+        
+        .tabs-viewport {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .tabs {
+            display: flex;
+            transition: transform 0.3s ease;
+            width: max-content;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: #e9ecef;
+            border: none;
+            border-right: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+        
+        .tab:hover {
+            background-color: #d1ecf1;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-bottom: 2px solid #007bff;
+            color: #007bff;
+            font-weight: bold;
+        }
+        
+        .tabs-indicator {
+            position: absolute;
+            bottom: 0;
+            right: 10px;
+            background: rgba(0,123,255,0.1);
+            color: #007bff;
+            padding: 5px 10px;
+            border-radius: 10px 10px 0 0;
+            font-size: 12px;
+            z-index: 10;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-input {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+            min-width: 250px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+        
+        .clear-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .clear-btn:hover {
+            background: #545b62;
+        }
+        
+        .export-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px;
+            transition: transform 0.2s ease;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+        
+        .tabulator {
+            margin-top: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        
+        /* 自定義 Tabulator 樣式 */
+        .tabulator .tabulator-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .tabulator .tabulator-header .tabulator-col {
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .tabulator .tabulator-header .tabulator-col-title {
+            color: white;
+            font-weight: bold;
+        }
+        
+        .tabulator .tabulator-header .tabulator-col .tabulator-col-sorter {
+            color: white;
+        }
+        
+        .tabulator .tabulator-row:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .tabulator .tabulator-row:hover {
+            background-color: #e3f2fd !important;
+        }
+        
+        .high-value {
+            background-color: #d4edda !important;
+            color: #155724 !important;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 3px;
+        }
+        
+        .medium-value {
+            background-color: #fff3cd !important;
+            color: #856404 !important;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 3px;
+        }
+        
+        .low-value {
+            background-color: #f8d7da !important;
+            color: #721c24 !important;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 3px;
+        }
+        
+        /* 功能按鈕樣式 */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .action-icon {
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        
+        .action-icon.enabled:hover {
+            background-color: rgba(0,0,0,0.1);
+            transform: scale(1.1);
+        }
+        
+        .action-icon.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .permission-icon.unlocked {
+            color: #28a745;
+        }
+        
+        .permission-icon.locked {
+            color: #dc3545;
+        }
+        
+        .edit-icon.enabled {
+            color: #007bff;
+        }
+        
+        .delete-icon.enabled {
+            color: #dc3545;
+        }
+        
+        .copy-icon.enabled {
+            color: #28a745;
+        }
+        
+        .add-btn {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .add-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+        }
+        
+        /* 多行文字樣式 */
+        .multiline-cell {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 200px;
+            line-height: 1.4;
+            min-height: 20px;
+        }
+        
+        /* 鎖定欄位樣式 */
+        .locked-cell {
+            background-color: #f8f9fa !important;
+            color: #6c757d !important;
+            cursor: not-allowed !important;
+            position: relative;
+        }
+        
+        .locked-cell::before {
+            content: "🔒";
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+            opacity: 0.6;
+        }
+        
+        /* 自動調整高度的表格行 */
+        .tabulator .tabulator-row {
+            min-height: 40px !important;
+        }
+
+        .tabulator .tabulator-cell {
+            white-space: pre-wrap !important;
+            word-break: break-word !important;
+            vertical-align: top !important;
+            padding: 8px !important;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-input {
+                min-width: 100%;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .action-buttons {
+                gap: 4px;
+            }
+            
+            .action-icon {
+                font-size: 14px;
+                padding: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Tabulator 多頁籤資料管理系統</h1>
+            <p>支援多工作表 Excel 匯出、搜尋排序與儲存格樣式設定</p>
+        </div>
+        
+        <div class="tabs-container">
+            <div class="tabs-wrapper">
+                <button class="tabs-nav-btn left" id="tabs-left-btn" onclick="scrollTabs('left')" disabled>
+                    ◀
+                </button>
+                <div class="tabs-viewport" id="tabs-viewport">
+                    <div class="tabs" id="tabs-container">
+                        <button class="tab active" data-tab="sales" onclick="showTab('sales', this)">銷售資料</button>
+                        <button class="tab" data-tab="inventory" onclick="showTab('inventory', this)">庫存資料</button>
+                        <button class="tab" data-tab="employees" onclick="showTab('employees', this)">員工資料</button>
+                        <button class="tab" data-tab="products" onclick="showTab('products', this)">產品資料</button>
+                        <button class="tab" data-tab="customers" onclick="showTab('customers', this)">客戶資料</button>
+                        <button class="tab" data-tab="orders" onclick="showTab('orders', this)">訂單資料</button>
+                        <button class="tab" data-tab="suppliers" onclick="showTab('suppliers', this)">供應商資料</button>
+                        <button class="tab" data-tab="reports" onclick="showTab('reports', this)">報表分析</button>
+                        <button class="tab" data-tab="settings" onclick="showTab('settings', this)">系統設定</button>
+                    </div>
+                </div>
+                <button class="tabs-nav-btn right" id="tabs-right-btn" onclick="scrollTabs('right')">
+                    ▶
+                </button>
+            </div>
+            <div class="tabs-indicator" id="tabs-indicator">
+                1 / 9
+            </div>
+        </div>
+        
+        <div id="sales" class="tab-content active">
+            <div class="controls">
+                <h3>🛒 銷售資料</h3>
+                <div class="search-container">
+                    <button class="add-btn" onclick="addNewRow('sales')">
+                        ➕ 新增資料
+                    </button>
+                    <input type="text" id="sales-search" class="search-input" placeholder="🔍 搜尋銷售資料..." onkeyup="searchTable('sales', this.value)">
+                    <button class="clear-btn" onclick="clearSearch('sales')">清除</button>
+                </div>
+            </div>
+            <div id="sales-table"></div>
+        </div>
+        
+        <div id="inventory" class="tab-content">
+            <div class="controls">
+                <h3>📦 庫存資料</h3>
+                <div class="search-container">
+                    <button class="add-btn" onclick="addNewRow('inventory')">
+                        ➕ 新增資料
+                    </button>
+                    <input type="text" id="inventory-search" class="search-input" placeholder="🔍 搜尋庫存資料..." onkeyup="searchTable('inventory', this.value)">
+                    <button class="clear-btn" onclick="clearSearch('inventory')">清除</button>
+                </div>
+            </div>
+            <div id="inventory-table"></div>
+        </div>
+        
+        <div id="employees" class="tab-content">
+            <div class="controls">
+                <h3>👥 員工資料</h3>
+                <div class="search-container">
+                    <button class="add-btn" onclick="addNewRow('employees')">
+                        ➕ 新增資料
+                    </button>
+                    <input type="text" id="employees-search" class="search-input" placeholder="🔍 搜尋員工資料..." onkeyup="searchTable('employees', this.value)">
+                    <button class="clear-btn" onclick="clearSearch('employees')">清除</button>
+                </div>
+            </div>
+            <div id="employees-table"></div>
+        </div>
+        
+        <div id="products" class="tab-content">
+            <div class="controls">
+                <h3>📱 產品資料</h3>
+                <div class="search-container">
+                    <button class="add-btn" onclick="addNewRow('products')">
+                        ➕ 新增資料
+                    </button>
+                    <input type="text" id="products-search" class="search-input" placeholder="🔍 搜尋產品資料..." onkeyup="searchTable('products', this.value)">
+                    <button class="clear-btn" onclick="clearSearch('products')">清除</button>
+                </div>
+            </div>
+            <div id="products-table"></div>
+        </div>
+        
+        <div id="customers" class="tab-content">
+            <div class="controls">
+                <h3>👤 客戶資料</h3>
+                <div class="search-container">
+                    <button class="add-btn" onclick="addNewRow('customers')">
+                        ➕ 新增資料
+                    </button>
+                    <input type="text" id="customers-search" class="search-input" placeholder="🔍 搜尋客戶資料..." onkeyup="searchTable('customers', this.value)">
+                    <button class="clear-btn" onclick="clearSearch('customers')">清除</button>
+                </div>
+            </div>
+            <div id="customers-table"></div>
+        </div>
+        
+        <div id="orders" class="tab-content">
+            <div class="controls">
+                <h3>📋 訂單資料</h3>
+                <div class="search-container">
+                    <button class="add-btn" onclick="addNewRow('orders')">
+                        ➕ 新增資料
+                    </button>
+                    <input type="text" id="orders-search" class="search-input" placeholder="🔍 搜尋訂單資料..." onkeyup="searchTable('orders', this.value)">
+                    <button class="clear-btn" onclick="clearSearch('orders')">清除</button>
+                </div>
+            </div>
+            <div id="orders-table"></div>
+        </div>
+        
+        <div id="suppliers" class="tab-content">
+            <div class="controls">
+                <h3>🏢 供應商資料</h3>
+                <div class="search-container">
+                    <button class="add-btn" onclick="addNewRow('suppliers')">
+                        ➕ 新增資料
+                    </button>
+                    <input type="text" id="suppliers-search" class="search-input" placeholder="🔍 搜尋供應商資料..." onkeyup="searchTable('suppliers', this.value)">
+                    <button class="clear-btn" onclick="clearSearch('suppliers')">清除</button>
+                </div>
+            </div>
+            <div id="suppliers-table"></div>
+        </div>
+        
+        <div id="reports" class="tab-content">
+            <div class="controls">
+                <h3>📊 報表分析</h3>
+                <div class="search-container">
+                    <button class="add-btn" onclick="addNewRow('reports')">
+                        ➕ 新增資料
+                    </button>
+                    <input type="text" id="reports-search" class="search-input" placeholder="🔍 搜尋報表資料..." onkeyup="searchTable('reports', this.value)">
+                    <button class="clear-btn" onclick="clearSearch('reports')">清除</button>
+                </div>
+            </div>
+            <div id="reports-table"></div>
+        </div>
+        
+        <div id="settings" class="tab-content">
+            <div class="controls">
+                <h3>⚙️ 系統設定</h3>
+                <div class="search-container">
+                    <button class="add-btn" onclick="addNewRow('settings')">
+                        ➕ 新增資料
+                    </button>
+                    <input type="text" id="settings-search" class="search-input" placeholder="🔍 搜尋設定項目..." onkeyup="searchTable('settings', this.value)">
+                    <button class="clear-btn" onclick="clearSearch('settings')">清除</button>
+                </div>
+            </div>
+            <div id="settings-table"></div>
+        </div>
+        
+        <button class="export-btn" onclick="exportToExcel()">
+            📁 匯出 Excel 檔案（含樣式）
+        </button>
+    </div>
+
+    <script>
+        // 儲存所有表格實例
+        let tables = {};
+        let currentTabIndex = 0;
+        let tabScrollOffset = 0;
+        const tabWidth = 120;
+
+        // 模擬資料（加入鎖定和多行內容的範例）
+        let salesData = [
+            {id: 1, product: "筆記型電腦", category: "3C產品", quantity: 25, price: 35000, total: 875000, status: "已完成", date: "2024-01-15"},
+            {id: 2, product: "滑鼠", category: "周邊設備", quantity: 150, price: 500, total: 75000, status: "中", date: "2024-02-10"},
+            {id: 3, product: "鍵盤\n機械式\n青軸", category: "周邊設備", quantity: 80, price: 1200, total: 96000, status: "中", date: "2024-02-20"},
+            {id: 4, product: "顯示器", category: "3C產品", quantity: 45, price: 8000, total: 360000, status: "已過期", date: "2024-03-05"},
+            {id: 5, product: "印表機\nHP LaserJet\n黑白列印", category: "辦公設備", quantity: 12, price: 3000, total: 36000, status: "低", date: "2024-03-15"}
+        ];
+
+        let inventoryData = [
+            {id: 1, item: "A4 紙張", category: "辦公用品", stock: 500, minStock: 100, location: "倉庫A", supplier: "文具商行\n聯絡人：王小明\n電話：02-1234-5678", status: "充足"},
+            {id: 2, item: "原子筆", category: "文具", stock: 80, minStock: 50, location: "倉庫B", supplier: "辦公用品店", status: "正常"},
+            {id: 3, item: "資料夾", category: "文具", stock: 25, minStock: 30, location: "倉庫A", supplier: "文具商行", status: "停用"},
+            {id: 4, item: "計算機", category: "辦公設備", stock: 200, minStock: 50, location: "倉庫C", supplier: "電子用品店\n專業維修\n保固一年", status: "充足"},
+            {id: 5, item: "橡皮擦", category: "文具", stock: 15, minStock: 20, location: "倉庫B", supplier: "文具商行", status: "不足"}
+        ];
+
+        let employeesData = [
+            {id: 1, name: "張小明", department: "資訊部", position: "軟體工程師\n全端開發\nJavaScript專家", salary: 55000, performance: "優秀", joinDate: "2020-03-15", email: "ming@company.com"},
+            {id: 2, name: "李美麗", department: "行銷部", position: "行銷專員", salary: 48000, performance: "已過期", joinDate: "2021-07-20", email: "mei@company.com"},
+            {id: 3, name: "王大華", department: "財務部", position: "會計師", salary: 52000, performance: "優秀", joinDate: "2019-11-10", email: "wang@company.com"},
+            {id: 4, name: "陳小花", department: "人事部", position: "人事專員\n招募負責人\n績效管理", salary: 45000, performance: "停用", joinDate: "2022-01-08", email: "chen@company.com"},
+            {id: 5, name: "林志強", department: "業務部", position: "業務經理", salary: 60000, performance: "良好", joinDate: "2020-09-12", email: "lin@company.com"}
+        ];
+
+        let productsData = [
+            {id: 1, name: "MacBook Pro", category: "筆記本電腦", price: 55000, stock: 20, status: "熱銷"},
+            {id: 2, name: "iPhone 15", category: "智慧手機", price: 32000, stock: 50, status: "熱銷"},
+            {id: 3, name: "iPad Air", category: "平板電腦", price: 18000, stock: 30, status: "普通"},
+            {id: 4, name: "AirPods Pro", category: "耳機", price: 7500, stock: 100, status: "熱銷"},
+            {id: 5, name: "Apple Watch", category: "智慧手錶", price: 12000, stock: 25, status: "普通"}
+        ];
+
+        let customersData = [
+            {id: 1, name: "台積電", contact: "張經理", phone: "02-1234-5678", email: "tsmc@company.com", level: "VIP"},
+            {id: 2, name: "鴻海科技", contact: "李主任", phone: "03-2345-6789", email: "foxconn@company.com", level: "VIP"},
+            {id: 3, name: "聯發科", contact: "王協理", phone: "03-3456-7890", email: "mediatek@company.com", level: "金牌"},
+            {id: 4, name: "華碩電腦", contact: "陳總監", phone: "02-4567-8901", email: "asus@company.com", level: "金牌"},
+            {id: 5, name: "宏碁集團", contact: "林副總", phone: "02-5678-9012", email: "acer@company.com", level: "銀牌"}
+        ];
+
+        let ordersData = [
+            {id: "ORD001", customer: "台積電", product: "MacBook Pro", quantity: 10, amount: 550000, status: "已完成", date: "2024-05-15"},
+            {id: "ORD002", customer: "鴻海科技", product: "iPhone 15", quantity: 25, amount: 800000, status: "處理中", date: "2024-05-20"},
+            {id: "ORD003", customer: "聯發科", product: "iPad Air", quantity: 15, amount: 270000, status: "已完成", date: "2024-05-18"},
+            {id: "ORD004", customer: "華碩電腦", product: "AirPods Pro", quantity: 50, amount: 375000, status: "待出貨", date: "2024-05-22"},
+            {id: "ORD005", customer: "宏碁集團", product: "Apple Watch", quantity: 20, amount: 240000, status: "處理中", date: "2024-05-25"}
+        ];
+
+        let suppliersData = [
+            {id: 1, name: "蘋果台灣", contact: "美國總部", phone: "+1-408-996-1010", products: "Apple產品", rating: "A+"},
+            {id: 2, name: "三星電子", contact: "韓國總部", phone: "+82-2-2255-0114", products: "Android設備", rating: "A"},
+            {id: 3, name: "聯想集團", contact: "中國總部", phone: "+86-10-5886-8888", products: "ThinkPad系列", rating: "B+"},
+            {id: 4, name: "戴爾科技", contact: "美國總部", phone: "+1-512-338-4400", products: "商用電腦", rating: "A-"},
+            {id: 5, name: "惠普企業", contact: "美國總部", phone: "+1-650-857-1501", products: "企業解決方案", rating: "B+"}
+        ];
+
+        let reportsData = [
+            {id: 1, name: "月度銷售報表", type: "銷售分析", lastUpdate: "2024-05-30", status: "最新", size: "2.5MB"},
+            {id: 2, name: "庫存週報", type: "庫存管理", lastUpdate: "2024-05-28", status: "最新", size: "1.8MB"},
+            {id: 3, name: "客戶滿意度調查", type: "客戶分析", lastUpdate: "2024-05-25", status: "需更新", size: "3.2MB"},
+            {id: 4, name: "供應商績效評估", type: "供應鏈", lastUpdate: "2024-05-20", status: "需更新", size: "4.1MB"},
+            {id: 5, name: "財務季報", type: "財務分析", lastUpdate: "2024-05-15", status: "已過期", size: "5.6MB"}
+        ];
+
+        let settingsData = [
+            {id: 1, module: "使用者管理", setting: "密碼政策", value: "8位數+特殊字元", status: "啟用"},
+            {id: 2, module: "系統安全", setting: "登入逾時", value: "30分鐘", status: "啟用"},
+            {id: 3, module: "資料備份", setting: "自動備份", value: "每日凌晨2點", status: "啟用"},
+            {id: 4, module: "郵件通知", setting: "訂單提醒", value: "即時通知", status: "停用"},
+            {id: 5, module: "報表設定", setting: "匯出格式", value: "Excel + PDF", status: "啟用"}
+        ];
+
+        // 獲取資料陣列的函數
+        function getDataArray(tableName) {
+            const dataMap = {
+                sales: salesData,
+                inventory: inventoryData,
+                employees: employeesData,
+                products: productsData,
+                customers: customersData,
+                orders: ordersData,
+                suppliers: suppliersData,
+                reports: reportsData,
+                settings: settingsData
+            };
+            return dataMap[tableName] || [];
+        }
+
+        // 模擬 API 請求
+        async function apiRequest(method, endpoint, data = null) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+            try {
+                if (method === 'POST' && data) {
+                    const newData = { ...data, id: Date.now() };
+                    return { success: true, data: newData };
+                } else if (method === 'PUT' && data) {
+                    return { success: true, data: data };
+                } else if (method === 'DELETE') {
+                    return { success: true };
+                }
+                
+                return { success: true, data: null };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // 權限檢查函數（加強版）
+        function checkPermission(rowData, action) {
+            // 定義受限制的狀態（這些狀態會被鎖定）
+            const restrictedStatuses = ['已完成', '已過期', '停用'];
+            const status = rowData.status || rowData.performance || rowData.level;
+            
+            if (action === 'edit' || action === 'delete') {
+                return !restrictedStatuses.includes(status);
+            }
+            
+            return true; // 複製功能一般都允許
+        }
+
+        // 檢查特定欄位是否可編輯
+        function isFieldEditable(rowData, fieldName) {
+            const restrictedStatuses = ['已完成', '已過期', '停用'];
+            const status = rowData.status || rowData.performance || rowData.level;
+            
+            // 如果整行都被鎖定，則所有欄位都不可編輯
+            if (restrictedStatuses.includes(status)) {
+                return false;
+            }
+            
+            // 特定欄位的額外限制（例如：ID 永遠不可編輯）
+            const alwaysReadOnlyFields = ['id'];
+            if (alwaysReadOnlyFields.includes(fieldName)) {
+                return false;
+            }
+            
+            return true;
+        }
+
+        // 創建功能欄位
+        function createActionColumn(tableName) {
+            return {
+                title: "功能",
+                field: "actions",
+                width: 200,
+                hozAlign: "center",
+                headerSort: false,
+                cellClick: function(e, cell) {
+                    e.stopPropagation();
+                },
+                formatter: function(cell, formatterParams) {
+                    const rowData = cell.getRow().getData();
+                    const canEdit = checkPermission(rowData, 'edit');
+                    const canDelete = checkPermission(rowData, 'delete');
+                    
+                    const permissionIcon = (canEdit && canDelete) ? 
+                        '<i class="action-icon permission-icon unlocked" title="可編輯">🔓</i>' : 
+                        '<i class="action-icon permission-icon locked" title="僅讀取">🔒</i>';
+                    
+                    const editIcon = canEdit ? 
+                        '<i class="action-icon edit-icon enabled" title="修改" onclick="editRow(\'' + tableName + '\', ' + JSON.stringify(rowData.id) + ')">✏️</i>' :
+                        '<i class="action-icon edit-icon disabled" title="無法修改">✏️</i>';
+                    
+                    const deleteIcon = canDelete ? 
+                        '<i class="action-icon delete-icon enabled" title="刪除" onclick="deleteRow(\'' + tableName + '\', ' + JSON.stringify(rowData.id) + ')">🗑️</i>' :
+                        '<i class="action-icon delete-icon disabled" title="無法刪除">🗑️</i>';
+                    
+                    const copyIcon = '<i class="action-icon copy-icon enabled" title="複製" onclick="copyRow(\'' + tableName + '\', ' + JSON.stringify(rowData.id) + ')">📋</i>';
+                    
+                    return `<div class="action-buttons">
+                        ${permissionIcon}
+                        ${editIcon}
+                        ${deleteIcon}
+                        ${copyIcon}
+                    </div>`;
+                }
+            };
+        }
+
+        // 自動調整行高的函數
+        function autoResizeRows(table) {
+            if (!table) return;
+            
+            setTimeout(() => {
+                const rows = table.getRows();
+                rows.forEach(row => {
+                    const cells = row.getCells();
+                    let maxLines = 1;
+                    
+                    cells.forEach(cell => {
+                        const value = cell.getValue();
+                        if (typeof value === 'string' && value.includes('\n')) {
+                            const lines = value.split('\n').length;
+                            maxLines = Math.max(maxLines, lines);
+                        }
+                    });
+                    
+                    // 設定行高
+                    const minHeight = Math.max(40, maxLines * 20 + 16);
+                    const rowElement = row.getElement();
+                    if (rowElement) {
+                        rowElement.style.height = minHeight + 'px';
+                    }
+                });
+            }, 100);
+        }
+        function multilineEditor(cell, onRendered, success, cancel, editorParams) {
+            const editor = document.createElement("textarea");
+            editor.style.padding = "4px";
+            editor.style.width = "100%";
+            editor.style.height = "80px";
+            editor.style.resize = "vertical";
+            editor.style.boxSizing = "border-box";
+            editor.style.border = "1px solid #ccc";
+            editor.style.borderRadius = "3px";
+            editor.value = cell.getValue() || "";
+
+            onRendered(function() {
+                editor.focus();
+                editor.style.height = "80px";
+            });
+
+            function successFunc() {
+                success(editor.value);
+            }
+
+            editor.addEventListener("blur", successFunc);
+            editor.addEventListener("keydown", function(e) {
+                if (e.keyCode == 13 && e.ctrlKey) {
+                    successFunc();
+                }
+                if (e.keyCode == 27) {
+                    cancel();
+                }
+            });
+
+            return editor;
+        }
+
+        // 多行文字格式化器（加強版）
+        function multilineFormatter(cell, formatterParams) {
+            const value = cell.getValue();
+            const rowData = cell.getRow().getData();
+            const field = cell.getColumn().getField();
+            
+            // 檢查是否為鎖定狀態
+            if (!isFieldEditable(rowData, field)) {
+                cell.getElement().classList.add('locked-cell');
+            }
+            
+            if (typeof value === 'string' && value.includes('\n')) {
+                const lines = value.split('\n');
+                const lineCount = lines.length;
+                
+                // 自動調整行高
+                setTimeout(() => {
+                    const rowElement = cell.getRow().getElement();
+                    const minHeight = Math.max(40, lineCount * 20 + 16);
+                    rowElement.style.height = minHeight + 'px';
+                }, 10);
+                
+                return '<div class="multiline-cell">' + value.replace(/\n/g, '<br>') + '</div>';
+            }
+            return value || '';
+        }
+
+        // 智能編輯器（根據內容自動選擇）
+        function smartEditor(cell, onRendered, success, cancel, editorParams) {
+            const rowData = cell.getRow().getData();
+            const field = cell.getColumn().getField();
+            const currentValue = cell.getValue() || "";
+            
+            // 檢查是否可編輯
+            if (!isFieldEditable(rowData, field)) {
+                // 顯示鎖定提示
+                showMessage('此欄位已被鎖定，無法編輯', 'warning');
+                cancel();
+                return;
+            }
+            
+            // 如果內容包含換行符或超過30字元，使用多行編輯器
+            if (currentValue.includes('\n') || currentValue.length > 30) {
+                return multilineEditor(cell, onRendered, success, cancel, editorParams);
+            } else {
+                // 使用單行編輯器
+                const editor = document.createElement("input");
+                editor.setAttribute("type", "text");
+                editor.style.padding = "4px";
+                editor.style.width = "100%";
+                editor.style.boxSizing = "border-box";
+                editor.style.border = "1px solid #ccc";
+                editor.style.borderRadius = "3px";
+                editor.value = currentValue;
+
+                onRendered(function() {
+                    editor.focus();
+                    editor.select();
+                });
+
+                function successFunc() {
+                    success(editor.value);
+                }
+
+                editor.addEventListener("blur", successFunc);
+                editor.addEventListener("keydown", function(e) {
+                    if (e.keyCode == 13) {
+                        successFunc();
+                    }
+                    if (e.keyCode == 27) {
+                        cancel();
+                    }
+                });
+
+                return editor;
+            }
+        }
+
+        // 新增資料功能
+        async function addNewRow(tableName) {
+            const table = tables[tableName];
+            if (!table) return;
+
+            const newData = createDefaultRowData(tableName);
+            
+            try {
+                const result = await apiRequest('POST', '/' + tableName, newData);
+                
+                if (result.success) {
+                    const createdData = result.data;
+                    // 更新對應的資料陣列
+                    const dataArray = getDataArray(tableName);
+                    dataArray.unshift(createdData);
+                    
+                    table.addData([createdData], true);
+                    showMessage('新增成功！', 'success');
+                } else {
+                    showMessage('新增失敗：' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Add row error:', error);
+                showMessage('新增過程中發生錯誤', 'error');
+            }
+        }
+
+        // 創建預設資料
+        function createDefaultRowData(tableName) {
+            const dataArray = getDataArray(tableName);
+            const getNextId = () => {
+                const maxId = Math.max(...dataArray.map(item => typeof item.id === 'number' ? item.id : 0));
+                return maxId + 1;
+            };
+
+            const defaultData = {
+                sales: {
+                    id: getNextId(),
+                    product: "新產品",
+                    category: "3C產品", 
+                    quantity: 1,
+                    price: 0,
+                    total: 0,
+                    status: "中",
+                    date: new Date().toISOString().slice(0, 10)
+                },
+                inventory: {
+                    id: getNextId(),
+                    item: "新品項",
+                    category: "辦公用品",
+                    stock: 0,
+                    minStock: 10,
+                    location: "倉庫A",
+                    supplier: "供應商",
+                    status: "正常"
+                },
+                employees: {
+                    id: getNextId(),
+                    name: "新員工",
+                    department: "資訊部",
+                    position: "職員",
+                    salary: 30000,
+                    performance: "普通",
+                    joinDate: new Date().toISOString().slice(0, 10),
+                    email: "email@company.com"
+                },
+                products: {
+                    id: getNextId(),
+                    name: "新產品",
+                    category: "電子產品",
+                    price: 0,
+                    stock: 0,
+                    status: "普通"
+                },
+                customers: {
+                    id: getNextId(),
+                    name: "新客戶",
+                    contact: "聯絡人",
+                    phone: "電話號碼",
+                    email: "email@company.com",
+                    level: "銀牌"
+                },
+                orders: {
+                    id: "ORD" + Date.now().toString().slice(-6),
+                    customer: "客戶名稱",
+                    product: "產品名稱",
+                    quantity: 1,
+                    amount: 0,
+                    status: "處理中",
+                    date: new Date().toISOString().slice(0, 10)
+                },
+                suppliers: {
+                    id: getNextId(),
+                    name: "新供應商",
+                    contact: "聯絡處",
+                    phone: "電話號碼",
+                    products: "產品說明",
+                    rating: "B"
+                },
+                reports: {
+                    id: getNextId(),
+                    name: "新報表",
+                    type: "分析報表",
+                    lastUpdate: new Date().toISOString().slice(0, 10),
+                    status: "需更新",
+                    size: "0MB"
+                },
+                settings: {
+                    id: getNextId(),
+                    module: "新模組",
+                    setting: "設定項目",
+                    value: "設定值",
+                    status: "停用"
+                }
+            };
+
+            return defaultData[tableName] || {};
+        }
+
+        // 修改資料功能
+        async function editRow(tableName, rowId) {
+            const table = tables[tableName];
+            if (!table) return;
+
+            const row = table.getRow(rowId);
+            const rowData = row.getData();
+            
+            if (!checkPermission(rowData, 'edit')) {
+                showMessage('此資料無法修改', 'warning');
+                return;
+            }
+
+            // 讓該行進入編輯模式
+            const cells = row.getCells();
+            cells.forEach(cell => {
+                const column = cell.getColumn();
+                const field = column.getField();
+                
+                if (field !== 'id' && field !== 'actions') {
+                    cell.edit();
+                }
+            });
+        }
+
+        // 儲存修改的資料
+        async function saveRowData(tableName, rowData) {
+            try {
+                const result = await apiRequest('PUT', '/' + tableName + '/' + rowData.id, rowData);
+                
+                if (result.success) {
+                    // 更新對應的資料陣列
+                    const dataArray = getDataArray(tableName);
+                    const index = dataArray.findIndex(item => item.id === rowData.id);
+                    if (index !== -1) {
+                        dataArray[index] = rowData;
+                    }
+                    
+                    showMessage('修改成功！', 'success');
+                    return result.data;
+                } else {
+                    showMessage('修改失敗：' + result.error, 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Save row error:', error);
+                showMessage('儲存過程中發生錯誤', 'error');
+                return false;
+            }
+        }
+
+        // 刪除資料功能
+        async function deleteRow(tableName, rowId) {
+            const table = tables[tableName];
+            if (!table) return;
+
+            const row = table.getRow(rowId);
+            const rowData = row.getData();
+            
+            if (!checkPermission(rowData, 'delete')) {
+                showMessage('此資料無法刪除', 'warning');
+                return;
+            }
+
+            if (!confirm('確定要刪除這筆資料嗎？此操作無法復原。')) {
+                return;
+            }
+
+            try {
+                const result = await apiRequest('DELETE', '/' + tableName + '/' + rowId);
+                
+                if (result.success) {
+                    // 從資料陣列中移除
+                    const dataArray = getDataArray(tableName);
+                    const index = dataArray.findIndex(item => item.id === rowId);
+                    if (index !== -1) {
+                        dataArray.splice(index, 1);
+                    }
+                    
+                    row.delete();
+                    showMessage('刪除成功！', 'success');
+                } else {
+                    showMessage('刪除失敗：' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Delete row error:', error);
+                showMessage('刪除過程中發生錯誤', 'error');
+            }
+        }
+
+        // 複製資料功能
+        async function copyRow(tableName, rowId) {
+            const table = tables[tableName];
+            if (!table) return;
+
+            const row = table.getRow(rowId);
+            const originalData = row.getData();
+            
+            const copiedData = { ...originalData };
+            delete copiedData.id;
+            
+            if (copiedData.name) {
+                copiedData.name = copiedData.name + " (副本)";
+            } else if (copiedData.product) {
+                copiedData.product = copiedData.product + " (副本)";
+            } else if (copiedData.item) {
+                copiedData.item = copiedData.item + " (副本)";
+            }
+
+            try {
+                const result = await apiRequest('POST', '/' + tableName, copiedData);
+                
+                if (result.success) {
+                    const createdData = result.data;
+                    
+                    // 更新對應的資料陣列
+                    const dataArray = getDataArray(tableName);
+                    dataArray.unshift(createdData);
+                    
+                    table.addData([createdData], true);
+                    showMessage('複製成功！', 'success');
+                } else {
+                    showMessage('複製失敗：' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Copy row error:', error);
+                showMessage('複製過程中發生錯誤', 'error');
+            }
+        }
+
+        // 顯示訊息
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${type}`;
+            messageDiv.textContent = message;
+            
+            Object.assign(messageDiv.style, {
+                position: 'fixed',
+                top: '20px',
+                right: '20px',
+                padding: '12px 20px',
+                borderRadius: '5px',
+                color: 'white',
+                fontWeight: 'bold',
+                zIndex: '9999',
+                opacity: '0',
+                transition: 'opacity 0.3s ease'
+            });
+
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545', 
+                warning: '#ffc107',
+                info: '#17a2b8'
+            };
+            messageDiv.style.backgroundColor = colors[type] || colors.info;
+
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.style.opacity = '1';
+            }, 100);
+
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 初始化表格
+        function initTables() {
+            // 銷售表格
+            tables.sales = new Tabulator("#sales-table", {
+                data: salesData,
+                layout: "fitColumns",
+                pagination: "local",
+                paginationSize: 10,
+                movableColumns: true,
+                resizableRows: true,
+                cellEdited: function(cell) {
+                    const table = cell.getTable();
+                    autoResizeRows(table);
+                },
+                columns: [
+                    {title: "ID", field: "id", width: 80, hozAlign: "center", sorter: "number", headerFilter: "input"},
+                    {title: "產品名稱", field: "product", width: 150, sorter: "string", headerFilter: "input", editor: smartEditor, formatter: multilineFormatter},
+                    {title: "分類", field: "category", width: 120, sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "3C產品", "周邊設備", "辦公設備"]}, editor: "select", editorParams: {values: ["3C產品", "周邊設備", "辦公設備"]}},
+                    {title: "數量", field: "quantity", width: 100, hozAlign: "right", sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "單價", field: "price", width: 120, hozAlign: "right", formatter: "money", formatterParams: {symbol: "NT$"}, sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "總金額", field: "total", width: 150, hozAlign: "right", formatter: "money", formatterParams: {symbol: "NT$"}, sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "狀態", field: "status", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "高", "中", "低", "已完成", "已過期"]}, editor: "select", editorParams: {values: ["高", "中", "低", "已完成", "已過期"]},
+                     formatter: function(cell) {
+                         const value = cell.getValue();
+                         const rowData = cell.getRow().getData();
+                         let className = "";
+                         
+                         // 檢查是否為鎖定狀態
+                         if (!isFieldEditable(rowData, 'status')) {
+                             cell.getElement().classList.add('locked-cell');
+                         }
+                         
+                         switch(value) {
+                             case "高": className = "high-value"; break;
+                             case "中": className = "medium-value"; break;
+                             case "低": className = "low-value"; break;
+                             case "已完成": className = "high-value"; break;
+                             case "已過期": className = "low-value"; break;
+                         }
+                         return `<span class="${className}">${value}</span>`;
+                     }
+                    },
+                    {title: "日期", field: "date", width: 120, hozAlign: "center", sorter: "date", headerFilter: "input", editor: "date"},
+                    createActionColumn('sales')
+                ]
+            });
+
+            // 庫存表格
+            tables.inventory = new Tabulator("#inventory-table", {
+                data: inventoryData,
+                layout: "fitColumns",
+                pagination: "local",
+                paginationSize: 10,
+                movableColumns: true,
+                resizableRows: true,
+                cellEdited: function(cell) {
+                    const rowData = cell.getRow().getData();
+                    saveRowData('inventory', rowData);
+                    // 編輯後重新調整行高
+                    autoResizeRows(tables.inventory);
+                },
+                columns: [
+                    {title: "ID", field: "id", width: 80, hozAlign: "center", sorter: "number", headerFilter: "input"},
+                    {title: "品項", field: "item", width: 150, sorter: "string", headerFilter: "input", editor: smartEditor, formatter: multilineFormatter},
+                    {title: "分類", field: "category", width: 120, sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "辦公用品", "文具", "辦公設備"]}, editor: "select", editorParams: {values: ["辦公用品", "文具", "辦公設備"]}},
+                    {title: "現有庫存", field: "stock", width: 120, hozAlign: "right", sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "最低庫存", field: "minStock", width: 120, hozAlign: "right", sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "位置", field: "location", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "倉庫A", "倉庫B", "倉庫C"]}, editor: "select", editorParams: {values: ["倉庫A", "倉庫B", "倉庫C"]}},
+                    {title: "供應商", field: "supplier", width: 140, sorter: "string", headerFilter: "input", editor: smartEditor, formatter: multilineFormatter},
+                    {title: "狀態", field: "status", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "充足", "正常", "不足", "停用"]}, editor: "select", editorParams: {values: ["充足", "正常", "不足", "停用"]},
+                     formatter: function(cell) {
+                         const value = cell.getValue();
+                         const rowData = cell.getRow().getData();
+                         let className = "";
+                         
+                         // 檢查是否為鎖定狀態
+                         if (!isFieldEditable(rowData, 'status')) {
+                             cell.getElement().classList.add('locked-cell');
+                         }
+                         
+                         switch(value) {
+                             case "充足": className = "high-value"; break;
+                             case "正常": className = "medium-value"; break;
+                             case "不足": className = "low-value"; break;
+                             case "停用": className = "low-value"; break;
+                         }
+                         return `<span class="${className}">${value}</span>`;
+                     }
+                    },
+                    createActionColumn('inventory')
+                ]
+            });
+            
+            // 員工表格
+            tables.employees = new Tabulator("#employees-table", {
+                data: employeesData,
+                layout: "fitColumns",
+                pagination: "local",
+                paginationSize: 10,
+                movableColumns: true,
+                resizableRows: true,
+                cellEdited: function(cell) {
+                    const rowData = cell.getRow().getData();
+                    saveRowData('employees', rowData);
+                },
+                columns: [
+                    {title: "ID", field: "id", width: 80, hozAlign: "center", sorter: "number", headerFilter: "input"},
+                    {title: "姓名", field: "name", width: 120, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "部門", field: "department", width: 120, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "資訊部", "行銷部", "財務部", "人事部", "業務部"]}, editor: "select", editorParams: {values: ["資訊部", "行銷部", "財務部", "人事部", "業務部"]}},
+                    {title: "職位", field: "position", width: 140, sorter: "string", headerFilter: "input", editor: multilineEditor, formatter: multilineFormatter},
+                    {title: "薪資", field: "salary", width: 120, hozAlign: "right", formatter: "money", formatterParams: {symbol: "NT$"}, sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "績效", field: "performance", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "優秀", "良好", "普通"]}, editor: "select", editorParams: {values: ["優秀", "良好", "普通"]},
+                     formatter: function(cell) {
+                         const value = cell.getValue();
+                         let className = "";
+                         switch(value) {
+                             case "優秀": className = "high-value"; break;
+                             case "良好": className = "medium-value"; break;
+                             case "普通": className = "low-value"; break;
+                         }
+                         return `<span class="${className}">${value}</span>`;
+                     }
+                    },
+                    {title: "到職日期", field: "joinDate", width: 120, hozAlign: "center", sorter: "date", headerFilter: "input", editor: "date"},
+                    {title: "Email", field: "email", width: 180, sorter: "string", headerFilter: "input", editor: "input"},
+                    createActionColumn('employees')
+                ]
+            });
+            
+            // 產品表格
+            tables.products = new Tabulator("#products-table", {
+                data: productsData,
+                layout: "fitColumns",
+                pagination: "local",
+                paginationSize: 10,
+                movableColumns: true,
+                resizableRows: true,
+                cellEdited: function(cell) {
+                    const rowData = cell.getRow().getData();
+                    saveRowData('products', rowData);
+                },
+                columns: [
+                    {title: "ID", field: "id", width: 80, hozAlign: "center", sorter: "number", headerFilter: "input"},
+                    {title: "產品名稱", field: "name", width: 200, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "分類", field: "category", width: 150, sorter: "string", headerFilter: "input", editor: multilineEditor, formatter: multilineFormatter},
+                    {title: "價格", field: "price", width: 120, hozAlign: "right", formatter: "money", formatterParams: {symbol: "NT$"}, sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "庫存", field: "stock", width: 100, hozAlign: "right", sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "狀態", field: "status", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "熱銷", "普通", "滯銷"]}, editor: "select", editorParams: {values: ["熱銷", "普通", "滯銷"]},
+                     formatter: function(cell) {
+                         const value = cell.getValue();
+                         let className = "";
+                         switch(value) {
+                             case "熱銷": className = "high-value"; break;
+                             case "普通": className = "medium-value"; break;
+                             case "滯銷": className = "low-value"; break;
+                         }
+                         return `<span class="${className}">${value}</span>`;
+                     }
+                    },
+                    createActionColumn('products')
+                ]
+            });
+            
+            // 客戶表格
+            tables.customers = new Tabulator("#customers-table", {
+                data: customersData,
+                layout: "fitColumns",
+                pagination: "local",
+                paginationSize: 10,
+                movableColumns: true,
+                resizableRows: true,
+                cellEdited: function(cell) {
+                    const rowData = cell.getRow().getData();
+                    saveRowData('customers', rowData);
+                },
+                columns: [
+                    {title: "ID", field: "id", width: 80, hozAlign: "center", sorter: "number", headerFilter: "input"},
+                    {title: "公司名稱", field: "name", width: 180, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "聯絡人", field: "contact", width: 120, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "電話", field: "phone", width: 140, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "Email", field: "email", width: 200, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "等級", field: "level", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "VIP", "金牌", "銀牌"]}, editor: "select", editorParams: {values: ["VIP", "金牌", "銀牌"]},
+                     formatter: function(cell) {
+                         const value = cell.getValue();
+                         let className = "";
+                         switch(value) {
+                             case "VIP": className = "high-value"; break;
+                             case "金牌": className = "medium-value"; break;
+                             case "銀牌": className = "low-value"; break;
+                         }
+                         return `<span class="${className}">${value}</span>`;
+                     }
+                    },
+                    createActionColumn('customers')
+                ]
+            });
+            
+            // 訂單表格
+            tables.orders = new Tabulator("#orders-table", {
+                data: ordersData,
+                layout: "fitColumns",
+                pagination: "local",
+                paginationSize: 10,
+                movableColumns: true,
+                resizableRows: true,
+                cellEdited: function(cell) {
+                    const rowData = cell.getRow().getData();
+                    saveRowData('orders', rowData);
+                },
+                columns: [
+                    {title: "訂單號", field: "id", width: 120, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "客戶", field: "customer", width: 150, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "產品", field: "product", width: 150, sorter: "string", headerFilter: "input", editor: multilineEditor, formatter: multilineFormatter},
+                    {title: "數量", field: "quantity", width: 100, hozAlign: "right", sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "金額", field: "amount", width: 150, hozAlign: "right", formatter: "money", formatterParams: {symbol: "NT$"}, sorter: "number", headerFilter: "number", editor: "number"},
+                    {title: "狀態", field: "status", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "已完成", "處理中", "待出貨"]}, editor: "select", editorParams: {values: ["已完成", "處理中", "待出貨"]},
+                     formatter: function(cell) {
+                         const value = cell.getValue();
+                         let className = "";
+                         switch(value) {
+                             case "已完成": className = "high-value"; break;
+                             case "處理中": className = "medium-value"; break;
+                             case "待出貨": className = "low-value"; break;
+                         }
+                         return `<span class="${className}">${value}</span>`;
+                     }
+                    },
+                    {title: "日期", field: "date", width: 120, hozAlign: "center", sorter: "date", headerFilter: "input", editor: "date"},
+                    createActionColumn('orders')
+                ]
+            });
+            
+            // 供應商表格
+            tables.suppliers = new Tabulator("#suppliers-table", {
+                data: suppliersData,
+                layout: "fitColumns",
+                pagination: "local",
+                paginationSize: 10,
+                movableColumns: true,
+                resizableRows: true,
+                cellEdited: function(cell) {
+                    const rowData = cell.getRow().getData();
+                    saveRowData('suppliers', rowData);
+                },
+                columns: [
+                    {title: "ID", field: "id", width: 80, hozAlign: "center", sorter: "number", headerFilter: "input"},
+                    {title: "供應商名稱", field: "name", width: 180, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "聯絡處", field: "contact", width: 150, sorter: "string", headerFilter: "input", editor: multilineEditor, formatter: multilineFormatter},
+                    {title: "電話", field: "phone", width: 180, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "主要產品", field: "products", width: 200, sorter: "string", headerFilter: "input", editor: multilineEditor, formatter: multilineFormatter},
+                    {title: "評級", field: "rating", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "A+", "A", "A-", "B+", "B"]}, editor: "select", editorParams: {values: ["A+", "A", "A-", "B+", "B"]},
+                     formatter: function(cell) {
+                         const value = cell.getValue();
+                         let className = "";
+                         if (value.startsWith("A")) {
+                             className = "high-value";
+                         } else if (value.startsWith("B")) {
+                             className = "medium-value";
+                         } else {
+                             className = "low-value";
+                         }
+                         return `<span class="${className}">${value}</span>`;
+                     }
+                    },
+                    createActionColumn('suppliers')
+                ]
+            });
+            
+            // 報表表格
+            tables.reports = new Tabulator("#reports-table", {
+                data: reportsData,
+                layout: "fitColumns",
+                pagination: "local",
+                paginationSize: 10,
+                movableColumns: true,
+                resizableRows: true,
+                cellEdited: function(cell) {
+                    const rowData = cell.getRow().getData();
+                    saveRowData('reports', rowData);
+                },
+                columns: [
+                    {title: "ID", field: "id", width: 80, hozAlign: "center", sorter: "number", headerFilter: "input"},
+                    {title: "報表名稱", field: "name", width: 200, sorter: "string", headerFilter: "input", editor: multilineEditor, formatter: multilineFormatter},
+                    {title: "類型", field: "type", width: 150, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "最後更新", field: "lastUpdate", width: 120, hozAlign: "center", sorter: "date", headerFilter: "input", editor: "date"},
+                    {title: "狀態", field: "status", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "最新", "需更新", "已過期"]}, editor: "select", editorParams: {values: ["最新", "需更新", "已過期"]},
+                     formatter: function(cell) {
+                         const value = cell.getValue();
+                         let className = "";
+                         switch(value) {
+                             case "最新": className = "high-value"; break;
+                             case "需更新": className = "medium-value"; break;
+                             case "已過期": className = "low-value"; break;
+                         }
+                         return `<span class="${className}">${value}</span>`;
+                     }
+                    },
+                    {title: "檔案大小", field: "size", width: 120, hozAlign: "right", sorter: "string", headerFilter: "input", editor: "input"},
+                    createActionColumn('reports')
+                ]
+            });
+            
+            // 設定表格
+            tables.settings = new Tabulator("#settings-table", {
+                data: settingsData,
+                layout: "fitColumns",
+                pagination: "local",
+                paginationSize: 10,
+                movableColumns: true,
+                resizableRows: true,
+                cellEdited: function(cell) {
+                    const rowData = cell.getRow().getData();
+                    saveRowData('settings', rowData);
+                },
+                columns: [
+                    {title: "ID", field: "id", width: 80, hozAlign: "center", sorter: "number", headerFilter: "input"},
+                    {title: "功能模組", field: "module", width: 150, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "設定項目", field: "setting", width: 150, sorter: "string", headerFilter: "input", editor: "input"},
+                    {title: "設定值", field: "value", width: 200, sorter: "string", headerFilter: "input", editor: multilineEditor, formatter: multilineFormatter},
+                    {title: "狀態", field: "status", width: 100, hozAlign: "center", sorter: "string", headerFilter: "select", headerFilterParams: {values: ["", "啟用", "停用"]}, editor: "select", editorParams: {values: ["啟用", "停用"]},
+                     formatter: function(cell) {
+                         const value = cell.getValue();
+                         let className = "";
+                         switch(value) {
+                             case "啟用": className = "high-value"; break;
+                             case "停用": className = "low-value"; break;
+                         }
+                         return `<span class="${className}">${value}</span>`;
+                     }
+                    },
+                    createActionColumn('settings')
+                ]
+            });
+        }
+        
+        // 頁籤切換功能
+        function showTab(tabName, tabElement) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            const targetContent = document.getElementById(tabName);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+            
+            if (tabElement) {
+                tabElement.classList.add('active');
+                
+                const tabsContainer = document.getElementById('tabs-container');
+                const tabsViewport = document.getElementById('tabs-viewport');
+                const tabIndex = Array.from(tabsContainer.children).indexOf(tabElement);
+                const tabPosition = tabIndex * tabWidth;
+                const viewportWidth = tabsViewport.offsetWidth;
+                const containerWidth = tabsContainer.scrollWidth;
+                const maxScroll = Math.max(0, containerWidth - viewportWidth);
+                
+                if (maxScroll > 0) {
+                    if (tabPosition < tabScrollOffset || tabPosition + tabWidth > tabScrollOffset + viewportWidth) {
+                        tabScrollOffset = Math.max(0, Math.min(maxScroll, tabPosition - viewportWidth / 2 + tabWidth / 2));
+                        tabsContainer.style.transform = `translateX(-${tabScrollOffset}px)`;
+                        
+                        document.getElementById('tabs-left-btn').disabled = tabScrollOffset <= 0;
+                        document.getElementById('tabs-right-btn').disabled = tabScrollOffset >= maxScroll;
+                        
+                        const visibleCount = Math.floor(viewportWidth / tabWidth);
+                        const visibleStart = Math.floor(tabScrollOffset / tabWidth) + 1;
+                        const visibleEnd = Math.min(9, visibleStart + visibleCount - 1);
+                        document.getElementById('tabs-indicator').textContent = `${visibleStart}-${visibleEnd} / 9`;
+                    }
+                }
+            }
+            
+            if (tables[tabName]) {
+                setTimeout(() => {
+                    Object.values(tables).forEach(table => autoResizeRows(table));
+                }, 500);
+            }
+        }
+        
+        // 全域搜尋功能
+        function searchTable(tableName, searchTerm) {
+            if (tables[tableName]) {
+                if (searchTerm.trim() === "") {
+                    tables[tableName].clearFilter();
+                } else {
+                    let searchFields = [];
+                    
+                    switch(tableName) {
+                        case 'sales':
+                            searchFields = ['product', 'category', 'status'];
+                            break;
+                        case 'inventory':
+                            searchFields = ['item', 'category', 'location', 'supplier', 'status'];
+                            break;
+                        case 'employees':
+                            searchFields = ['name', 'department', 'position', 'performance', 'email'];
+                            break;
+                        case 'products':
+                            searchFields = ['name', 'category', 'status'];
+                            break;
+                        case 'customers':
+                            searchFields = ['name', 'contact', 'email', 'level'];
+                            break;
+                        case 'orders':
+                            searchFields = ['id', 'customer', 'product', 'status'];
+                            break;
+                        case 'suppliers':
+                            searchFields = ['name', 'contact', 'products', 'rating'];
+                            break;
+                        case 'reports':
+                            searchFields = ['name', 'type', 'status'];
+                            break;
+                        case 'settings':
+                            searchFields = ['module', 'setting', 'value', 'status'];
+                            break;
+                        default:
+                            searchFields = ['name', 'product', 'item'];
+                    }
+                    
+                    const filters = searchFields.map(field => ({
+                        field: field,
+                        type: "like",
+                        value: searchTerm
+                    }));
+                    
+                    tables[tableName].setFilter([filters]);
+                }
+            }
+        }
+        
+        // 清除搜尋
+        function clearSearch(tableName) {
+            const searchInput = document.getElementById(tableName + '-search');
+            if (searchInput) {
+                searchInput.value = "";
+            }
+            if (tables[tableName]) {
+                tables[tableName].clearFilter();
+            }
+        }
+        
+        // 頁籤滾動功能
+        function scrollTabs(direction) {
+            const tabsContainer = document.getElementById('tabs-container');
+            const tabsViewport = document.getElementById('tabs-viewport');
+            const leftBtn = document.getElementById('tabs-left-btn');
+            const rightBtn = document.getElementById('tabs-right-btn');
+            const indicator = document.getElementById('tabs-indicator');
+            
+            const viewportWidth = tabsViewport.offsetWidth;
+            const containerWidth = tabsContainer.scrollWidth;
+            const maxScroll = Math.max(0, containerWidth - viewportWidth);
+            
+            if (maxScroll <= 0) {
+                return;
+            }
+            
+            const scrollStep = tabWidth * 2;
+            
+            if (direction === 'left') {
+                tabScrollOffset = Math.max(0, tabScrollOffset - scrollStep);
+            } else {
+                tabScrollOffset = Math.min(maxScroll, tabScrollOffset + scrollStep);
+            }
+            
+            tabsContainer.style.transform = `translateX(-${tabScrollOffset}px)`;
+            
+            leftBtn.disabled = tabScrollOffset <= 0;
+            rightBtn.disabled = tabScrollOffset >= maxScroll;
+            
+            const visibleCount = Math.floor(viewportWidth / tabWidth);
+            const visibleStart = Math.floor(tabScrollOffset / tabWidth) + 1;
+            const visibleEnd = Math.min(9, visibleStart + visibleCount - 1);
+            indicator.textContent = `${visibleStart}-${visibleEnd} / 9`;
+        }
+        
+        // 匯出 Excel 功能（使用 ExcelJS）
+        async function exportToExcel() {
+            try {
+                const workbook = new ExcelJS.Workbook();
+                workbook.creator = '資料管理系統';
+                workbook.lastModifiedBy = '系統管理員';
+                workbook.created = new Date();
+                workbook.modified = new Date();
+                
+                await createSalesWorksheet(workbook);
+                await createInventoryWorksheet(workbook);
+                await createEmployeesWorksheet(workbook);
+                await createProductsWorksheet(workbook);
+                await createCustomersWorksheet(workbook);
+                await createOrdersWorksheet(workbook);
+                await createSuppliersWorksheet(workbook);
+                await createReportsWorksheet(workbook);
+                await createSettingsWorksheet(workbook);
+                
+                const fileName = `完整資料報表_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                alert(`🎉 Excel 檔案已成功匯出：${fileName}\n\n✅ 包含完整樣式設計\n✅ 多工作表結構\n✅ 條件格式化\n✅ 專業表格樣式`);
+            } catch (e) {
+                console.error('匯出錯誤:', e);
+                alert('匯出過程中發生錯誤，請重試');
+            }
+        }
+        
+        // 創建各工作表
+        async function createSalesWorksheet(workbook) {
+            const worksheet = workbook.addWorksheet('銷售資料');
+            const headers = ['ID', '產品名稱', '分類', '數量', '單價', '總金額', '狀態', '日期'];
+            const columnWidths = [8, 20, 15, 12, 18, 20, 12, 15];
+            createWorksheet(worksheet, headers, columnWidths, salesData, '銷售資料報表', 7);
+        }
+        
+        async function createInventoryWorksheet(workbook) {
+            const worksheet = workbook.addWorksheet('庫存資料');
+            const headers = ['ID', '品項', '分類', '現有庫存', '最低庫存', '位置', '供應商', '狀態'];
+            const columnWidths = [8, 20, 15, 15, 15, 12, 18, 12];
+            createWorksheet(worksheet, headers, columnWidths, inventoryData, '庫存管理報表', 8);
+        }
+        
+        async function createEmployeesWorksheet(workbook) {
+            const worksheet = workbook.addWorksheet('員工資料');
+            const headers = ['ID', '姓名', '部門', '職位', '薪資', '績效', '到職日期', 'Email'];
+            const columnWidths = [8, 15, 15, 18, 18, 12, 15, 28];
+            createWorksheet(worksheet, headers, columnWidths, employeesData, '員工資料統計', 6);
+        }
+        
+        async function createProductsWorksheet(workbook) {
+            const worksheet = workbook.addWorksheet('產品資料');
+            const headers = ['ID', '產品名稱', '分類', '價格', '庫存', '狀態'];
+            const columnWidths = [8, 20, 18, 18, 12, 12];
+            createWorksheet(worksheet, headers, columnWidths, productsData, '產品資料統計', 6);
+        }
+        
+        async function createCustomersWorksheet(workbook) {
+            const worksheet = workbook.addWorksheet('客戶資料');
+            const headers = ['ID', '公司名稱', '聯絡人', '電話', 'Email', '等級'];
+            const columnWidths = [8, 20, 15, 18, 25, 12];
+            createWorksheet(worksheet, headers, columnWidths, customersData, '客戶資料統計', 6);
+        }
+        
+        async function createOrdersWorksheet(workbook) {
+            const worksheet = workbook.addWorksheet('訂單資料');
+            const headers = ['訂單號', '客戶', '產品', '數量', '金額', '狀態', '日期'];
+            const columnWidths = [15, 18, 18, 12, 20, 12, 15];
+            createWorksheet(worksheet, headers, columnWidths, ordersData, '訂單資料統計', 6);
+        }
+        
+        async function createSuppliersWorksheet(workbook) {
+            const worksheet = workbook.addWorksheet('供應商資料');
+            const headers = ['ID', '供應商名稱', '聯絡處', '電話', '主要產品', '評級'];
+            const columnWidths = [8, 20, 18, 20, 25, 12];
+            createWorksheet(worksheet, headers, columnWidths, suppliersData, '供應商資料統計', 6);
+        }
+        
+        async function createReportsWorksheet(workbook) {
+            const worksheet = workbook.addWorksheet('報表分析');
+            const headers = ['ID', '報表名稱', '類型', '最後更新', '狀態', '檔案大小'];
+            const columnWidths = [8, 25, 18, 15, 12, 15];
+            createWorksheet(worksheet, headers, columnWidths, reportsData, '報表分析統計', 5);
+        }
+        
+        async function createSettingsWorksheet(workbook) {
+            const worksheet = workbook.addWorksheet('系統設定');
+            const headers = ['ID', '功能模組', '設定項目', '設定值', '狀態'];
+            const columnWidths = [8, 18, 18, 25, 12];
+            createWorksheet(worksheet, headers, columnWidths, settingsData, '系統設定統計', 5);
+        }
+        
+        // 創建工作表
+        function createWorksheet(worksheet, headers, columnWidths, data, title, statusColumn) {
+            worksheet.getCell('A1').value = title;
+            worksheet.getCell('A1').font = {
+                name: 'Microsoft JhengHei',
+                size: 16,
+                bold: true,
+                color: { argb: 'FF4472C4' }
+            };
+            worksheet.getCell('A1').alignment = {
+                horizontal: 'left',
+                vertical: 'middle'
+            };
+            
+            for (let i = 0; i < headers.length; i++) {
+                worksheet.getColumn(i + 2).width = columnWidths[i];
+            }
+            
+            for (let i = 0; i < headers.length; i++) {
+                const cell = worksheet.getCell(2, i + 2);
+                cell.value = headers[i];
+            }
+            
+            data.forEach((row, index) => {
+                const rowNumber = index + 3;
+                const values = Object.values(row);
+                for (let i = 0; i < values.length; i++) {
+                    const cell = worksheet.getCell(rowNumber, i + 2);
+                    let value = values[i];
+                    
+                    if (typeof value === 'string' && (value.includes('\n') || value.includes('<br>'))) {
+                        value = value.replace(/<br\s*\/?>/gi, '\n');
+                        cell.value = value;
+                        cell.alignment = {
+                            wrapText: true,
+                            vertical: 'top',
+                            horizontal: 'left'
+                        };
+                        const estimatedLines = (value.match(/\n/g) || []).length + 1;
+                        worksheet.getRow(rowNumber).height = Math.max(25, estimatedLines * 15);
+                    } else {
+                        cell.value = value;
+                    }
+                }
+            });
+            
+            applyWorksheetStyles(worksheet, headers.length + 1, data.length, statusColumn);
+        }
+        
+        // 通用樣式應用函數
+        function applyWorksheetStyles(worksheet, maxCol, dataLength, statusColumn) {
+            const headerRow = worksheet.getRow(2);
+            headerRow.height = 30;
+            
+            for (let col = 2; col <= maxCol; col++) {
+                const cell = worksheet.getCell(2, col);
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FF4472C4' }
+                };
+                cell.font = {
+                    name: 'Microsoft JhengHei',
+                    color: { argb: 'FFFFFFFF' },
+                    bold: true,
+                    size: 12
+                };
+                cell.alignment = {
+                    horizontal: 'center',
+                    vertical: 'middle'
+                };
+                cell.border = {
+                    top: { style: 'medium', color: { argb: 'FF2F5597' } },
+                    left: { style: 'medium', color: { argb: 'FF2F5597' } },
+                    bottom: { style: 'medium', color: { argb: 'FF2F5597' } },
+                    right: { style: 'medium', color: { argb: 'FF2F5597' } }
+                };
+            }
+            
+            for (let rowNum = 3; rowNum <= dataLength + 2; rowNum++) {
+                const row = worksheet.getRow(rowNum);
+                row.height = 25;
+                
+                for (let col = 2; col <= maxCol; col++) {
+                    const cell = worksheet.getCell(rowNum, col);
+                    
+                    cell.font = {
+                        name: 'Microsoft JhengHei',
+                        size: 11
+                    };
+                    cell.alignment = {
+                        horizontal: 'center',
+                        vertical: 'middle'
+                    };
+                    cell.border = {
+                        top: { style: 'thin', color: { argb: 'FFD0D7DE' } },
+                        left: { style: 'thin', color: { argb: 'FFD0D7DE' } },
+                        bottom: { style: 'thin', color: { argb: 'FFD0D7DE' } },
+                        right: { style: 'thin', color: { argb: 'FFD0D7DE' } }
+                    };
+                    
+                    const cellValue = cell.value;
+                    if (typeof cellValue === 'number' && cellValue > 1000) {
+                        cell.alignment.horizontal = 'right';
+                        cell.numFmt = '#,##0';
+                    }
+                    
+                    if (col === statusColumn + 1) {
+                        const value = cell.value;
+                        let fillColor, fontColor;
+                        
+                        if (['高', '充足', '優秀', '熱銷', 'VIP', '已完成', 'A+', 'A', '最新', '啟用'].includes(value)) {
+                            fillColor = 'FFC6EFCE';
+                            fontColor = 'FF006100';
+                        } else if (['中', '正常', '良好', '普通', '金牌', '處理中', 'A-', 'B+', '需更新'].includes(value)) {
+                            fillColor = 'FFFFEB9C';
+                            fontColor = 'FF9C5700';
+                        } else if (['低', '不足', '滯銷', '銀牌', '待出貨', 'B', '已過期', '停用'].includes(value)) {
+                            fillColor = 'FFFFC7CE';
+                            fontColor = 'FF9C0006';
+                        }
+                        
+                        if (fillColor) {
+                            cell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: fillColor }
+                            };
+                            cell.font.color = { argb: fontColor };
+                            cell.font.bold = true;
+                        }
+                    }
+                    
+                    if (rowNum % 2 === 0 && col !== statusColumn + 1) {
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFF2F2F2' }
+                        };
+                    }
+                }
+            }
+        }
+        
+        // 初始化頁籤滾動狀態
+        function initTabScrolling() {
+            const tabsViewport = document.getElementById('tabs-viewport');
+            const tabsContainer = document.getElementById('tabs-container');
+            const leftBtn = document.getElementById('tabs-left-btn');
+            const rightBtn = document.getElementById('tabs-right-btn');
+            const indicator = document.getElementById('tabs-indicator');
+            
+            tabScrollOffset = 0;
+            tabsContainer.style.transform = 'translateX(0px)';
+            
+            const viewportWidth = tabsViewport.offsetWidth;
+            const containerWidth = tabsContainer.scrollWidth;
+            const maxScroll = Math.max(0, containerWidth - viewportWidth);
+            
+            if (maxScroll <= 0) {
+                leftBtn.disabled = true;
+                rightBtn.disabled = true;
+                indicator.textContent = '1-9 / 9';
+            } else {
+                leftBtn.disabled = true;
+                rightBtn.disabled = false;
+                const visibleCount = Math.floor(viewportWidth / tabWidth);
+                indicator.textContent = `1-${Math.min(visibleCount, 9)} / 9`;
+            }
+        }
+        
+        // 響應式調整
+        function handleResize() {
+            setTimeout(() => {
+                initTabScrolling();
+                
+                const activeTab = document.querySelector('.tab.active');
+                if (activeTab) {
+                    const tabName = activeTab.getAttribute('data-tab');
+                    if (tables[tabName]) {
+                        tables[tabName].redraw();
+                    }
+                }
+            }, 100);
+        }
+        
+        // 鍵盤快捷鍵支援
+        function handleKeyboardShortcuts(event) {
+            if (event.ctrlKey) {
+                const tabs = document.querySelectorAll('.tab');
+                const activeTab = document.querySelector('.tab.active');
+                const currentIndex = Array.from(tabs).indexOf(activeTab);
+                
+                if (event.key === 'ArrowLeft' && currentIndex > 0) {
+                    event.preventDefault();
+                    const prevTab = tabs[currentIndex - 1];
+                    const tabName = prevTab.getAttribute('data-tab');
+                    showTab(tabName, prevTab);
+                } else if (event.key === 'ArrowRight' && currentIndex < tabs.length - 1) {
+                    event.preventDefault();
+                    const nextTab = tabs[currentIndex + 1];
+                    const tabName = nextTab.getAttribute('data-tab');
+                    showTab(tabName, nextTab);
+                }
+            }
+        }
+        
+        // 頁面載入完成後初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTables();
+            initTabScrolling();
+            
+            window.addEventListener('resize', handleResize);
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+            
+            // 為頁籤添加觸控滑動支援
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            const tabsViewport = document.getElementById('tabs-viewport');
+            
+            tabsViewport.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            tabsViewport.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleTabSwipe();
+            });
+            
+            function handleTabSwipe() {
+                const swipeThreshold = 50;
+                const diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        scrollTabs('right');
+                    } else {
+                        scrollTabs('left');
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
