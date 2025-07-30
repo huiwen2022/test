@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabulator CRUD 表格</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.5.0/css/tabulator.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.5.0/js/tabulator.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        #example-table {
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            padding: 4px 8px;
+            margin: 0 2px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .edit-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .add-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+        
+        .editing-row {
+            background-color: #fff3cd !important;
+        }
+        
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tabulator CRUD 表格</h1>
+        <div id="alert" class="alert"></div>
+        
+        <!-- 新增資料按鈕 -->
+        <div style="margin-bottom: 15px;">
+            <button id="addRowBtn" class="action-btn add-btn">
+                ➕ 新增資料
+            </button>
+        </div>
+        
+        <div id="example-table"></div>
+    </div>
+
+    <script>
+        // 全域變數
+        let table;
+        let originalRowData = {};
+        let nextId = 6;
+        
+        // 初始資料
+        const tableData = [
+            {id: 1, name: "張小明", email: "ming@example.com", age: 25, department: "資訊部", description: "負責系統開發\n維護資料庫"},
+            {id: 2, name: "李小華", email: "hua@example.com", age: 30, department: "行銷部", description: "市場推廣\n客戶關係管理"},
+            {id: 3, name: "王小美", email: "mei@example.com", age: 28, department: "人事部", description: "招聘面試\n員工培訓"},
+            {id: 4, name: "陳小強", email: "qiang@example.com", age: 32, department: "財務部", description: "會計記帳\n財務分析"},
+            {id: 5, name: "林小玲", email: "ling@example.com", age: 26, department: "業務部", description: "業務開發\n客戶服務"}
+        ];
+
+        // 顯示訊息
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // 模擬 AJAX 請求
+        function mockAjaxRequest(action, data) {
+            return {
+                success: true,
+                message: `${action}操作成功`,
+                data: data
+            };
+        }
+
+        // 建立操作按鈕
+        function createActionButtons(cell, formatterParams, onRendered) {
+            const rowData = cell.getRow().getData();
+            const isEditing = rowData._editing;
+            const container = document.createElement('div');
+            
+            if (isEditing) {
+                const saveBtn = document.createElement('button');
+                saveBtn.className = 'action-btn save-btn';
+                saveBtn.textContent = '儲存';
+                saveBtn.onclick = () => saveRow(rowData.id);
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'action-btn cancel-btn';
+                cancelBtn.textContent = '取消';
+                cancelBtn.onclick = () => cancelEdit(rowData.id);
+                
+                container.appendChild(saveBtn);
+                container.appendChild(cancelBtn);
+            } else {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'action-btn edit-btn';
+                editBtn.textContent = '修改';
+                editBtn.onclick = () => editRow(rowData.id);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-btn delete-btn';
+                deleteBtn.textContent = '刪除';
+                deleteBtn.onclick = () => deleteRow(rowData.id);
+                
+                container.appendChild(editBtn);
+                container.appendChild(deleteBtn);
+            }
+            
+            return container;
+        }
+
+        // 開始編輯
+        function editRow(rowId) {
+            const row = table.getRow(rowId);
+            const rowData = row.getData();
+            
+            // 儲存原始資料
+            originalRowData[rowId] = {...rowData};
+            
+            // 設定編輯狀態
+            row.update({...rowData, _editing: true});
+            row.getElement().classList.add('editing-row');
+            
+            setTimeout(() => {
+                table.redraw(true);
+            }, 10);
+            
+            showAlert('進入編輯模式', 'success');
+        }
+
+        // 儲存資料
+        function saveRow(rowId) {
+            const row = table.getRow(rowId);
+            const rowData = row.getData();
+            
+            try {
+                const saveData = {...rowData};
+                delete saveData._editing;
+                
+                // 輸出 JSON 格式到 console
+                console.log('=== 儲存資料 ===');
+                console.log(JSON.stringify(saveData, null, 2));
+                console.log('==================');
+                
+                const response = mockAjaxRequest('更新', saveData);
+                
+                if (response.success) {
+                    row.update({...saveData, _editing: false});
+                    row.getElement().classList.remove('editing-row');
+                    delete originalRowData[rowId];
+                    
+                    setTimeout(() => {
+                        table.redraw(true);
+                    }, 10);
+                    
+                    showAlert('資料更新成功！', 'success');
+                }
+            } catch (error) {
+                showAlert('儲存失敗，請重試', 'danger');
+            }
+        }
+
+        // 取消編輯
+        function cancelEdit(rowId) {
+            const row = table.getRow(rowId);
+            
+            if (originalRowData[rowId]) {
+                row.update({...originalRowData[rowId], _editing: false});
+                delete originalRowData[rowId];
+            }
+            
+            row.getElement().classList.remove('editing-row');
+            
+            setTimeout(() => {
+                table.redraw(true);
+            }, 10);
+            
+            showAlert('已取消編輯', 'success');
+        }
+
+        // 刪除資料
+        function deleteRow(rowId) {
+            if (confirm('確定要刪除這筆資料嗎？')) {
+                try {
+                    const row = table.getRow(rowId);
+                    const rowData = row.getData();
+                    
+                    const deleteData = {...rowData};
+                    delete deleteData._editing;
+                    
+                    // 輸出 JSON 格式到 console
+                    console.log('=== 刪除資料 ===');
+                    console.log(JSON.stringify(deleteData, null, 2));
+                    console.log('==================');
+                    
+                    const response = mockAjaxRequest('刪除', deleteData);
+                    
+                    if (response.success) {
+                        table.deleteRow(rowId);
+                        showAlert('資料刪除成功！', 'success');
+                    }
+                } catch (error) {
+                    showAlert('刪除失敗，請重試', 'danger');
+                }
+            }
+        }
+
+        // 新增資料
+        function addNewRow() {
+            const newRow = {
+                id: nextId++,
+                name: "",
+                email: "",
+                age: 0,
+                department: "資訊部",
+                description: "",
+                _editing: true
+            };
+            
+            originalRowData[newRow.id] = {
+                id: newRow.id,
+                name: "",
+                email: "",
+                age: 0,
+                department: "資訊部",
+                description: ""
+            };
+            
+            table.addRow(newRow, true);
+            
+            setTimeout(() => {
+                const newRowElement = table.getRow(newRow.id);
+                newRowElement.getElement().classList.add('editing-row');
+                table.redraw(true);
+            }, 10);
+            
+            showAlert('已新增空白資料，請填寫後點選儲存', 'success');
+        }
+
+        // 建立文字輸入編輯器
+        function createTextEditor(cell, onRendered, success, cancel) {
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = cell.getValue() || "";
+            input.style.width = "100%";
+            input.style.border = "1px solid #007bff";
+            input.style.padding = "6px";
+            input.style.fontSize = "14px";
+            input.style.outline = "none";
+            
+            input.addEventListener("blur", function() {
+                success(input.value);
+            });
+            
+            input.addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    success(input.value);
+                } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    cancel();
+                }
+            });
+            
+            onRendered(function() {
+                setTimeout(() => {
+                    input.focus();
+                    input.select();
+                }, 10);
+            });
+            
+            return input;
+        }
+
+        // 建立數字輸入編輯器
+        function createNumberEditor(cell, onRendered, success, cancel) {
+            const input = document.createElement("input");
+            input.type = "number";
+            input.value = cell.getValue() || "";
+            input.style.width = "100%";
+            input.style.border = "1px solid #007bff";
+            input.style.padding = "6px";
+            input.style.fontSize = "14px";
+            input.style.outline = "none";
+            
+            input.addEventListener("blur", function() {
+                success(parseInt(input.value) || 0);
+            });
+            
+            input.addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    success(parseInt(input.value) || 0);
+                } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    cancel();
+                }
+            });
+            
+            onRendered(function() {
+                setTimeout(() => {
+                    input.focus();
+                    input.select();
+                }, 10);
+            });
+            
+            return input;
+        }
+
+        // 建立下拉選單編輯器
+        function createSelectEditor(cell, onRendered, success, cancel) {
+            const select = document.createElement("select");
+            select.style.width = "100%";
+            select.style.border = "1px solid #007bff";
+            select.style.padding = "6px";
+            select.style.fontSize = "14px";
+            select.style.outline = "none";
+            
+            const options = ["資訊部", "行銷部", "人事部", "財務部", "業務部"];
+            options.forEach(optionText => {
+                const option = document.createElement("option");
+                option.value = optionText;
+                option.textContent = optionText;
+                if (optionText === cell.getValue()) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            select.addEventListener("change", function() {
+                success(select.value);
+            });
+            
+            select.addEventListener("blur", function() {
+                success(select.value);
+            });
+            
+            select.addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    success(select.value);
+                } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    cancel();
+                }
+            });
+            
+            onRendered(function() {
+                setTimeout(() => {
+                    select.focus();
+                    if (select.showPicker) {
+                        select.showPicker();
+                    }
+                }, 50);
+            });
+            
+            return select;
+        }
+
+        // 建立文字區域編輯器
+        function createTextareaEditor(cell, onRendered, success, cancel) {
+            const textarea = document.createElement("textarea");
+            textarea.value = cell.getValue() || "";
+            textarea.style.width = "100%";
+            textarea.style.height = "80px";
+            textarea.style.border = "1px solid #007bff";
+            textarea.style.padding = "6px";
+            textarea.style.fontSize = "14px";
+            textarea.style.outline = "none";
+            textarea.style.resize = "vertical";
+            textarea.placeholder = "可輸入多行文字...";
+            
+            textarea.addEventListener("blur", function() {
+                success(textarea.value);
+            });
+            
+            textarea.addEventListener("keydown", function(e) {
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    cancel();
+                }
+            });
+            
+            onRendered(function() {
+                setTimeout(() => {
+                    textarea.focus();
+                    textarea.select();
+                }, 10);
+            });
+            
+            return textarea;
+        }
+
+        // 初始化表格
+        table = new Tabulator("#example-table", {
+            data: tableData,
+            layout: "fitColumns",
+            responsiveLayout: "hide",
+            pagination: "local",
+            paginationSize: 10,
+            placeholder: "沒有資料",
+            columns: [
+                {
+                    title: "ID", 
+                    field: "id", 
+                    width: 80, 
+                    headerFilter: "input",
+                    editor: false
+                },
+                {
+                    title: "姓名", 
+                    field: "name", 
+                    headerFilter: "input",
+                    editor: function(cell, onRendered, success, cancel) {
+                        const rowData = cell.getRow().getData();
+                        return rowData._editing ? createTextEditor(cell, onRendered, success, cancel) : false;
+                    }
+                },
+                {
+                    title: "電子郵件", 
+                    field: "email", 
+                    headerFilter: "input",
+                    editor: function(cell, onRendered, success, cancel) {
+                        const rowData = cell.getRow().getData();
+                        return rowData._editing ? createTextEditor(cell, onRendered, success, cancel) : false;
+                    }
+                },
+                {
+                    title: "年齡", 
+                    field: "age", 
+                    width: 100,
+                    headerFilter: "input",
+                    editor: function(cell, onRendered, success, cancel) {
+                        const rowData = cell.getRow().getData();
+                        return rowData._editing ? createNumberEditor(cell, onRendered, success, cancel) : false;
+                    }
+                },
+                {
+                    title: "部門", 
+                    field: "department", 
+                    headerFilter: "input",
+                    editor: function(cell, onRendered, success, cancel) {
+                        const rowData = cell.getRow().getData();
+                        return rowData._editing ? createSelectEditor(cell, onRendered, success, cancel) : false;
+                    }
+                },
+                {
+                    title: "工作描述", 
+                    field: "description", 
+                    headerFilter: "input",
+                    formatter: function(cell) {
+                        const value = cell.getValue() || "";
+                        return value.replace(/\n/g, '<br>');
+                    },
+                    editor: function(cell, onRendered, success, cancel) {
+                        const rowData = cell.getRow().getData();
+                        return rowData._editing ? createTextareaEditor(cell, onRendered, success, cancel) : false;
+                    }
+                },
+                {
+                    title: "操作", 
+                    field: "actions", 
+                    width: 150,
+                    formatter: createActionButtons,
+                    headerSort: false
+                }
+            ]
+        });
+
+        // 表格建立完成後綁定事件
+        table.on("tableBuilt", function() {
+            console.log("表格建立完成");
+            document.getElementById('addRowBtn').addEventListener('click', addNewRow);
+        });
+    </script>
+</body>
+</html>
